@@ -1,4 +1,0 @@
-{
-  "reason": "A coherent mean-reversion story and sign-flip refinement are offset by zero post-refinement effectiveness, an elevated internal overfitting score (0.50), and excessive nested Rank/Ma/Zscore/Med layers with multiple magic windows (5/10/40) that obscure the signal.",
-  "score": 4
-}

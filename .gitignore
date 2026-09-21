@@ -7,3 +7,5 @@ runs/
 .pytest_cache/
 dist/
 build/
+/*.json
+/.*.json
