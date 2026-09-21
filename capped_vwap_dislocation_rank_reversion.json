@@ -1,0 +1,27 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Ma", "param": ["baseline_window"], "input": ["daily_range"], "output": "average_daily_range"},
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "close_minus_vwap"},
+    {"name": "Div", "param": [], "input": ["close_minus_vwap", "average_daily_range"], "output": "raw_gap_to_range"},
+    {"name": "Abs", "param": [], "input": ["raw_gap_to_range"], "output": "absolute_gap_to_range"},
+    {"name": "Div", "param": [], "input": ["close", "close"], "output": "unity"},
+    {"name": "Sum", "param": ["gap_cap"], "input": ["unity"], "output": "gap_cap_scalar"},
+    {"name": "Div", "param": [], "input": ["absolute_gap_to_range", "gap_cap_scalar"], "output": "normalized_gap_magnitude"},
+    {"name": "Tanh", "param": [], "input": ["normalized_gap_magnitude"], "output": "bounded_gap_shape"},
+    {"name": "Mul", "param": [], "input": ["gap_cap_scalar", "bounded_gap_shape"], "output": "capped_gap_magnitude"},
+    {"name": "Sign", "param": [], "input": ["raw_gap_to_range"], "output": "gap_sign"},
+    {"name": "Mul", "param": [], "input": ["gap_sign", "capped_gap_magnitude"], "output": "capped_gap_to_range"},
+    {"name": "Ma", "param": ["baseline_window"], "input": ["volume"], "output": "average_volume"},
+    {"name": "Greater", "param": [], "input": ["volume", "average_volume"], "output": "participation_confirmed"},
+    {"name": "Mul", "param": [], "input": ["capped_gap_to_range", "participation_confirmed"], "output": "filtered_gap_signal"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["filtered_gap_signal"], "output": "smoothed_dislocation"},
+    {"name": "Rank", "param": ["baseline_window"], "input": ["smoothed_dislocation"], "output": "dislocation_percentile"},
+    {"name": "Neg", "param": [], "input": ["dislocation_percentile"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"baseline_window": 20, "gap_cap": 2, "smoothing_window": 3},
+    {"baseline_window": 40, "gap_cap": 3, "smoothing_window": 5},
+    {"baseline_window": 60, "gap_cap": 4, "smoothing_window": 8}
+  ]
+}

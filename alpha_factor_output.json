@@ -1,0 +1,13 @@
+{
+  "name": "volume_confirmed_vol_adj_momentum",
+  "description": "Identifies stocks whose recent price trend is unusually strong relative to their typical day-to-day volatility, scaled by how elevated today's trading volume is versus recent history. Higher values suggest directional moves with stronger participation and conviction.",
+  "pseudo_code": [
+    "log_vwap = Log(input=[vwap], param=[])",
+    "log_vwap_change = Diff(input=[log_vwap], param=[log_diff_lag])",
+    "realized_volatility = Std(input=[log_vwap_change], param=[lookback_period])",
+    "vwap_momentum = Pct(input=[vwap], param=[momentum_lag])",
+    "risk_adjusted_momentum = Div(input=[vwap_momentum, realized_volatility], param=[])",
+    "volume_percentile = Rank(input=[volume], param=[lookback_period])",
+    "alpha = Mul(input=[risk_adjusted_momentum, volume_percentile], param=[])"
+  ]
+}

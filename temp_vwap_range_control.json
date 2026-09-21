@@ -1,0 +1,40 @@
+{
+  "formula": [
+    {"name": "Add", "param": [], "input": ["vwap", "vwap"], "output": "doubled_vwap"},
+    {"name": "Add", "param": [], "input": ["high", "low"], "output": "range_mid_sum"},
+    {"name": "Sub", "param": [], "input": ["doubled_vwap", "range_mid_sum"], "output": "vwap_mid_diff"},
+    {"name": "Sign", "param": [], "input": ["vwap_mid_diff"], "output": "vwap_side_sign"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Sum", "param": ["control_window"], "input": ["vwap_side_sign"], "output": "position_sum"},
+    {"name": "Sum", "param": ["control_window"], "input": ["daily_range"], "output": "range_sum"},
+    {"name": "Div", "param": [], "input": ["position_sum", "range_sum"], "output": "control_ratio"},
+    {"name": "Rank", "param": ["control_window"], "input": ["control_ratio"], "output": "ranked_control"},
+    {"name": "Ma", "param": ["control_window"], "input": ["ranked_control"], "output": "control_core"},
+    {"name": "Ma", "param": ["baseline_window"], "input": ["daily_range"], "output": "baseline_range"},
+    {"name": "Div", "param": [], "input": ["daily_range", "baseline_range"], "output": "normalized_range"},
+    {"name": "Rank", "param": ["baseline_window"], "input": ["normalized_range"], "output": "ranked_range"},
+    {"name": "Log", "param": [], "input": ["volume"], "output": "log_volume"},
+    {"name": "Ma", "param": ["baseline_window"], "input": ["log_volume"], "output": "baseline_log_volume"},
+    {"name": "Div", "param": [], "input": ["log_volume", "baseline_log_volume"], "output": "relative_log_volume"},
+    {"name": "Rank", "param": ["baseline_window"], "input": ["relative_log_volume"], "output": "ranked_volume"},
+    {"name": "Corr", "param": ["baseline_window"], "input": ["ranked_range", "ranked_volume"], "output": "range_volume_corr"},
+    {"name": "Pct", "param": ["control_window"], "input": ["open"], "output": "open_momentum"},
+    {"name": "Pct", "param": ["control_window"], "input": ["vwap"], "output": "vwap_momentum"},
+    {"name": "Corr", "param": ["baseline_window"], "input": ["open_momentum", "vwap_momentum"], "output": "open_vwap_corr"},
+    {"name": "Delay", "param": ["prior_vwap_lag"], "input": ["vwap"], "output": "prior_vwap"},
+    {"name": "Sub", "param": [], "input": ["open", "prior_vwap"], "output": "overnight_gap"},
+    {"name": "Sign", "param": [], "input": ["overnight_gap"], "output": "overnight_gap_sign"},
+    {"name": "Sub", "param": [], "input": ["vwap", "open"], "output": "intraday_vwap_diff"},
+    {"name": "Sign", "param": [], "input": ["intraday_vwap_diff"], "output": "intraday_vwap_sign"},
+    {"name": "Mul", "param": [], "input": ["overnight_gap_sign", "intraday_vwap_sign"], "output": "session_direction"},
+    {"name": "Rank", "param": ["baseline_window"], "input": ["session_direction"], "output": "session_alignment"},
+    {"name": "Mul", "param": [], "input": ["open_vwap_corr", "session_alignment"], "output": "session_gate"},
+    {"name": "Mul", "param": [], "input": ["control_core", "range_volume_corr"], "output": "confirmation_layer"},
+    {"name": "Mul", "param": [], "input": ["confirmation_layer", "session_gate"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"control_window": 10, "baseline_window": 20, "prior_vwap_lag": 1},
+    {"control_window": 15, "baseline_window": 30, "prior_vwap_lag": 1},
+    {"control_window": 20, "baseline_window": 60, "prior_vwap_lag": 1}
+  ]
+}

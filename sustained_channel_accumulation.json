@@ -1,0 +1,60 @@
+{
+  "formula": [
+    {"name": "Max", "param": ["channel_window"], "input": ["high"], "output": "channel_high"},
+    {"name": "Min", "param": ["channel_window"], "input": ["low"], "output": "channel_low"},
+    {"name": "Sub", "param": [], "input": ["channel_high", "channel_low"], "output": "channel_range"},
+    {"name": "Greater", "param": [], "input": ["high", "low"], "output": "hl_greater"},
+    {"name": "Sum", "param": ["channel_window"], "input": ["hl_greater"], "output": "range_divisor_numerator"},
+    {"name": "Sum", "param": ["channel_window"], "input": ["hl_greater"], "output": "range_divisor_denominator"},
+    {"name": "Div", "param": [], "input": ["range_divisor_numerator", "range_divisor_denominator"], "output": "range_divisor"},
+    {"name": "Div", "param": [], "input": ["channel_range", "range_divisor"], "output": "channel_range_scaled"},
+    {"name": "Sub", "param": [], "input": ["channel_high", "channel_range_scaled"], "output": "channel_threshold"},
+    {"name": "Greater", "param": [], "input": ["close", "channel_threshold"], "output": "above_channel"},
+    {"name": "Sum", "param": ["occupancy_window"], "input": ["hl_greater"], "output": "occupancy_normalizer"},
+    {"name": "Sum", "param": ["occupancy_window"], "input": ["above_channel"], "output": "sum_above_channel"},
+    {"name": "Div", "param": [], "input": ["sum_above_channel", "occupancy_normalizer"], "output": "channel_occupancy"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Sub", "param": [], "input": ["close", "low"], "output": "close_minus_low"},
+    {"name": "Div", "param": [], "input": ["close_minus_low", "daily_range"], "output": "close_position"},
+    {"name": "Ma", "param": ["occupancy_window"], "input": ["close_position"], "output": "avg_close_position"},
+    {"name": "Diff", "param": ["return_lag_period"], "input": ["close"], "output": "daily_return"},
+    {"name": "Neg", "param": [], "input": ["daily_return"], "output": "neg_daily_return"},
+    {"name": "Greater", "param": [], "input": ["daily_return", "neg_daily_return"], "output": "return_positive_flag"},
+    {"name": "Mul", "param": [], "input": ["return_positive_flag", "daily_return"], "output": "positive_return"},
+    {"name": "Mul", "param": [], "input": ["volume", "positive_return"], "output": "up_volume"},
+    {"name": "Sum", "param": ["occupancy_window"], "input": ["up_volume"], "output": "sum_up_volume"},
+    {"name": "Sum", "param": ["occupancy_window"], "input": ["volume"], "output": "sum_volume"},
+    {"name": "Div", "param": [], "input": ["sum_up_volume", "sum_volume"], "output": "up_volume_ratio"},
+    {"name": "Sum", "param": ["occupancy_window"], "input": ["hl_greater"], "output": "eligibility_midpoint_numerator"},
+    {"name": "Sum", "param": ["channel_window"], "input": ["hl_greater"], "output": "eligibility_midpoint_denominator"},
+    {"name": "Div", "param": [], "input": ["eligibility_midpoint_numerator", "eligibility_midpoint_denominator"], "output": "eligibility_midpoint"},
+    {"name": "Sub", "param": [], "input": ["channel_occupancy", "eligibility_midpoint"], "output": "ramp_numerator"},
+    {"name": "Div", "param": [], "input": ["ramp_numerator", "eligibility_midpoint"], "output": "ramp_raw"},
+    {"name": "Neg", "param": [], "input": ["ramp_raw"], "output": "neg_ramp_raw"},
+    {"name": "Greater", "param": [], "input": ["ramp_raw", "neg_ramp_raw"], "output": "ramp_positive_flag"},
+    {"name": "Mul", "param": [], "input": ["ramp_positive_flag", "ramp_raw"], "output": "positive_ramp"},
+    {"name": "Div", "param": [], "input": ["occupancy_normalizer", "occupancy_normalizer"], "output": "unit_cap"},
+    {"name": "Greater", "param": [], "input": ["unit_cap", "ramp_raw"], "output": "ramp_cap_flag"},
+    {"name": "Mul", "param": [], "input": ["positive_ramp", "ramp_cap_flag"], "output": "bounded_ramp"},
+    {"name": "Mul", "param": [], "input": ["channel_occupancy", "avg_close_position"], "output": "core_signal"},
+    {"name": "Mul", "param": [], "input": ["core_signal", "up_volume_ratio"], "output": "signal_with_volume"},
+    {"name": "Mul", "param": [], "input": ["signal_with_volume", "bounded_ramp"], "output": "alpha"}
+  ],
+  "arguments": [
+    {
+      "channel_window": 20,
+      "occupancy_window": 10,
+      "return_lag_period": 1
+    },
+    {
+      "channel_window": 40,
+      "occupancy_window": 20,
+      "return_lag_period": 1
+    },
+    {
+      "channel_window": 60,
+      "occupancy_window": 30,
+      "return_lag_period": 1
+    }
+  ]
+}

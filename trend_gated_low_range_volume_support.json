@@ -1,0 +1,153 @@
+{
+  "formula": [
+    {
+      "name": "Min",
+      "param": ["lookback_window"],
+      "input": ["low"],
+      "output": "range_low"
+    },
+    {
+      "name": "Max",
+      "param": ["lookback_window"],
+      "input": ["high"],
+      "output": "range_high"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["range_high", "range_low"],
+      "output": "range_width"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["range_low", "range_high"],
+      "output": "range_center_sum"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["close", "close"],
+      "output": "close_doubled"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["range_center_sum", "close_doubled"],
+      "output": "center_minus_close"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["center_minus_close", "range_width"],
+      "output": "inverted_range_position"
+    },
+    {
+      "name": "Diff",
+      "param": [],
+      "input": ["close"],
+      "output": "daily_close_change"
+    },
+    {
+      "name": "Diff",
+      "param": [],
+      "input": ["volume"],
+      "output": "daily_volume_change"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["daily_close_change"],
+      "output": "negated_close_change"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["daily_close_change", "negated_close_change"],
+      "output": "up_day_indicator"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["up_day_indicator", "daily_volume_change"],
+      "output": "up_day_volume_change"
+    },
+    {
+      "name": "Sum",
+      "param": ["lookback_window"],
+      "input": ["up_day_volume_change"],
+      "output": "up_volume_total"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["daily_volume_change"],
+      "output": "abs_volume_change"
+    },
+    {
+      "name": "Sum",
+      "param": ["lookback_window"],
+      "input": ["abs_volume_change"],
+      "output": "volume_activity_total"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["up_volume_total", "volume_activity_total"],
+      "output": "volume_concentration_ratio"
+    },
+    {
+      "name": "Ma",
+      "param": ["trend_short_window"],
+      "input": ["close"],
+      "output": "short_term_trend"
+    },
+    {
+      "name": "Ma",
+      "param": ["trend_long_window"],
+      "input": ["close"],
+      "output": "long_term_trend"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["short_term_trend", "long_term_trend"],
+      "output": "trend_spread"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["trend_spread"],
+      "output": "trend_sign"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["inverted_range_position", "volume_concentration_ratio"],
+      "output": "volume_confirmed_position"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume_confirmed_position", "trend_sign"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_window": 20,
+      "trend_short_window": 10,
+      "trend_long_window": 50
+    },
+    {
+      "lookback_window": 10,
+      "trend_short_window": 5,
+      "trend_long_window": 20
+    },
+    {
+      "lookback_window": 60,
+      "trend_short_window": 20,
+      "trend_long_window": 120
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "smooth_volume_confirmed_range_reversion",
+  "description": "Fades stocks trading at extreme positions within their recent price range when volume co-moves with that range position. Stronger extremes and stronger volume alignment produce larger mean-reversion signals, while mid-range or weakly confirmed names are down-weighted smoothly.",
+  "pseudo_code": [
+    "range_spread = Sub(input=[close, low], param=[])",
+    "daily_range = Sub(input=[high, low], param=[])",
+    "range_position = Div(input=[range_spread, daily_range], param=[])",
+    "range_zscore = Zscore(input=[range_position], param=[lookback_period])",
+    "volume_coherence = Corr(input=[range_position, volume], param=[correlation_window])",
+    "scaled_coherence = Div(input=[volume_coherence, correlation_scale], param=[])",
+    "volume_weight = Tanh(input=[scaled_coherence], param=[])",
+    "extremity_magnitude = Abs(input=[range_zscore], param=[])",
+    "mean_reversion_core = Neg(input=[range_zscore], param=[])",
+    "weighted_signal = Mul(input=[mean_reversion_core, volume_weight], param=[])",
+    "alpha = Mul(input=[weighted_signal, extremity_magnitude], param=[])"
+  ]
+}

@@ -1,0 +1,71 @@
+seed: 42
+
+data:
+  source: synthetic          # synthetic | csv
+  n_stocks: 100              # synthetic only
+  n_days: 1200               # synthetic only
+  csv_dir: null              # csv only: directory of per-instrument CSV files
+  train_ratio: 0.7           # chronological split
+  horizon: 10                # forward return horizon in trading days
+
+# Allowed range for look-back window parameters in generated formulas
+window_range: [2, 60]
+
+mcts:
+  exploration_weight: 1.0    # UCT c
+  initial_budget: 3          # B: expansion steps per tree
+  budget_increment: 1        # b: added on each in-tree score breakthrough
+  max_budget: 12             # safety cap per tree
+  dimension_temperature: 1.0 # T in softmax dimension sampling
+  e_max: 1.0                 # max per-dimension score
+  max_correction_attempts: 3 # LLM formula fix retries
+
+mining:
+  n_trees: 12                # number of MCTS trees (search restarts)
+  target_zoo_size: 20        # stop early once the zoo reaches this size
+
+zoo:
+  min_rank_ic: 0.015
+  min_rank_ir: 0.3
+  max_turnover: 1.6
+  max_correlation: 0.8
+  max_rel_rank: 0.95         # R_RankIC and R_RankIR must be <= this
+
+fsa:
+  top_k: 3                   # forbidden frequent subtrees
+  min_support: 0.3           # minimum fraction of zoo alphas containing the gene
+  min_alphas: 5              # start FSA only once the zoo has this many alphas
+
+evaluation:
+  top_frac: 0.1              # top decile portfolio for turnover computation
+
+llm:
+  backend: mock              # mock | cursor
+  model: composer-2.5        # cursor backend model id
+  few_shot_k: 1              # exemplars per refinement suggestion
+  correlation_filter_eta: 0.5  # drop top eta fraction most-correlated exemplars
+  temperature_generate: 1.0
+  temperature_correct: 0.8
+  temperature_overfit: 0.1
+
+combiner:
+  alpha_set_sizes: [10]
+  models: [lightgbm, mlp]
+  lightgbm:
+    num_leaves: 32
+    n_estimators: 200
+    max_depth: 8
+    learning_rate: 0.05
+    reg_alpha: 0.1
+    reg_lambda: 0.1
+  mlp:
+    hidden: [256, 128, 64]
+    dropout: 0.3
+    lr: 0.001
+    batch_size: 1024
+    max_epochs: 50
+    patience: 5
+
+backtest:
+  top_frac: 0.1              # top-k as fraction of the pool
+  cost: 0.0015               # per-trade transaction cost

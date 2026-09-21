@@ -1,0 +1,26 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "price_range"},
+    {"name": "Ma", "param": ["price_scale_window"], "input": ["close"], "output": "scaled_close"},
+    {"name": "Div", "param": [], "input": ["price_range", "scaled_close"], "output": "normalized_range"},
+    {"name": "Log", "param": [], "input": ["volume"], "output": "log_volume"},
+    {"name": "Corr", "param": ["short_corr_window"], "input": ["normalized_range", "log_volume"], "output": "short_range_vol_corr"},
+    {"name": "Corr", "param": ["long_corr_window"], "input": ["normalized_range", "log_volume"], "output": "long_range_vol_corr"},
+    {"name": "Add", "param": [], "input": ["short_range_vol_corr", "long_range_vol_corr"], "output": "blended_range_vol_corr"},
+    {"name": "Sub", "param": [], "input": ["close", "close"], "output": "zero_level"},
+    {"name": "Greater", "param": [], "input": ["short_range_vol_corr", "zero_level"], "output": "positive_short_gate"},
+    {"name": "Mul", "param": [], "input": ["short_range_vol_corr", "positive_short_gate"], "output": "positive_short_corr"},
+    {"name": "Sub", "param": [], "input": ["close", "low"], "output": "close_above_low"},
+    {"name": "Div", "param": [], "input": ["close_above_low", "price_range"], "output": "close_in_range"},
+    {"name": "Rank", "param": ["long_corr_window"], "input": ["log_volume"], "output": "volume_rank"},
+    {"name": "Mul", "param": [], "input": ["blended_range_vol_corr", "positive_short_corr"], "output": "liquidity_structure"},
+    {"name": "Mul", "param": [], "input": ["liquidity_structure", "close_in_range"], "output": "pressure_component"},
+    {"name": "Mul", "param": [], "input": ["pressure_component", "volume_rank"], "output": "raw_signal"},
+    {"name": "Tanh", "param": [], "input": ["raw_signal"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"price_scale_window": 20, "short_corr_window": 20, "long_corr_window": 60},
+    {"price_scale_window": 10, "short_corr_window": 15, "long_corr_window": 45},
+    {"price_scale_window": 30, "short_corr_window": 30, "long_corr_window": 90}
+  ]
+}

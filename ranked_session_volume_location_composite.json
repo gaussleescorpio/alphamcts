@@ -1,0 +1,147 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Ma",
+      "param": ["range_window"],
+      "input": ["daily_range"],
+      "output": "normalized_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "open_close_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["open_close_diff", "normalized_range"],
+      "output": "session_body"
+    },
+    {
+      "name": "Delay",
+      "param": ["delay_period"],
+      "input": ["close"],
+      "output": "prior_close"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["open", "prior_close"],
+      "output": "open_prior_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["open_prior_diff", "normalized_range"],
+      "output": "overnight_gap"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["session_body", "overnight_gap"],
+      "output": "session_signal"
+    },
+    {
+      "name": "Zscore",
+      "param": ["range_window"],
+      "input": ["session_signal"],
+      "output": "session_zscore"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["session_zscore"],
+      "output": "session_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["range_window"],
+      "input": ["volume"],
+      "output": "avg_volume"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume", "avg_volume"],
+      "output": "relative_volume"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["relative_volume"],
+      "output": "volume_rank"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "close"],
+      "output": "high_close_diff"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_low_diff"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close_low_diff", "high_close_diff"],
+      "output": "location_numerator"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["location_numerator", "daily_range"],
+      "output": "close_location"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["close_location"],
+      "output": "location_rank"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["session_rank", "volume_rank"],
+      "output": "session_volume_sum"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["session_volume_sum", "location_rank"],
+      "output": "composite_score"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["composite_score"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "range_window": 20,
+      "rank_window": 60,
+      "delay_period": 1
+    },
+    {
+      "range_window": 10,
+      "rank_window": 30,
+      "delay_period": 1
+    },
+    {
+      "range_window": 40,
+      "rank_window": 120,
+      "delay_period": 1
+    }
+  ]
+}

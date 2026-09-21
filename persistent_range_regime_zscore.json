@@ -1,0 +1,93 @@
+{
+  "formula": [
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "range_ratio"
+    },
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["range_ratio"],
+      "output": "log_range"
+    },
+    {
+      "name": "Ma",
+      "param": ["range_window"],
+      "input": ["log_range"],
+      "output": "range_mean"
+    },
+    {
+      "name": "Std",
+      "param": ["range_window"],
+      "input": ["log_range"],
+      "output": "range_std"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["log_range", "range_mean"],
+      "output": "log_range_deviation"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["log_range_deviation", "range_std"],
+      "output": "range_level_z"
+    },
+    {
+      "name": "Diff",
+      "param": [],
+      "input": ["log_range"],
+      "output": "daily_range_change"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["daily_range_change"],
+      "output": "expansion_sign"
+    },
+    {
+      "name": "Sum",
+      "param": ["persistence_window"],
+      "input": ["expansion_sign"],
+      "output": "expansion_count"
+    },
+    {
+      "name": "Rank",
+      "param": ["persistence_window"],
+      "input": ["expansion_count"],
+      "output": "persistence_score"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["range_level_z", "persistence_score"],
+      "output": "gated_signal"
+    },
+    {
+      "name": "Zscore",
+      "param": ["zscore_window"],
+      "input": ["gated_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "range_window": 10,
+      "persistence_window": 5,
+      "zscore_window": 20
+    },
+    {
+      "range_window": 20,
+      "persistence_window": 10,
+      "zscore_window": 60
+    },
+    {
+      "range_window": 40,
+      "persistence_window": 15,
+      "zscore_window": 120
+    }
+  ]
+}

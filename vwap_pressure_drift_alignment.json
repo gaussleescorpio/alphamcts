@@ -1,0 +1,26 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "intraday_range"},
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "vwap_deviation"},
+    {"name": "Div", "param": [], "input": ["vwap_deviation", "intraday_range"], "output": "relative_vwap_pressure"},
+    {"name": "Zscore", "param": ["normalization_window"], "input": ["relative_vwap_pressure"], "output": "pressure_zscore"},
+    {"name": "Diff", "param": [], "input": ["close"], "output": "daily_close_change"},
+    {"name": "Std", "param": ["normalization_window"], "input": ["close"], "output": "close_volatility"},
+    {"name": "Div", "param": [], "input": ["daily_close_change", "close_volatility"], "output": "volatility_normalized_drift"},
+    {"name": "Corr", "param": ["alignment_window"], "input": ["pressure_zscore", "volatility_normalized_drift"], "output": "pressure_drift_correlation"},
+    {"name": "Ma", "param": ["trend_window"], "input": ["daily_close_change"], "output": "slow_trend_drift"},
+    {"name": "Sign", "param": [], "input": ["slow_trend_drift"], "output": "trend_direction"},
+    {"name": "Mul", "param": [], "input": ["pressure_drift_correlation", "trend_direction"], "output": "directional_alignment"},
+    {"name": "Log", "param": [], "input": ["volume"], "output": "log_volume"},
+    {"name": "Rank", "param": ["alignment_window"], "input": ["log_volume"], "output": "liquidity_weight"},
+    {"name": "Ma", "param": ["normalization_window"], "input": ["intraday_range"], "output": "average_intraday_range"},
+    {"name": "Greater", "param": [], "input": ["intraday_range", "average_intraday_range"], "output": "range_quality_gate"},
+    {"name": "Mul", "param": [], "input": ["directional_alignment", "liquidity_weight"], "output": "liquidity_adjusted_signal"},
+    {"name": "Mul", "param": [], "input": ["liquidity_adjusted_signal", "range_quality_gate"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"normalization_window": 20, "alignment_window": 10, "trend_window": 60},
+    {"normalization_window": 40, "alignment_window": 20, "trend_window": 80},
+    {"normalization_window": 60, "alignment_window": 30, "trend_window": 120}
+  ]
+}

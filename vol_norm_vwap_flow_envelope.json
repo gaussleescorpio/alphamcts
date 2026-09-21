@@ -1,0 +1,153 @@
+{
+  "formula": [
+    {
+      "name": "Pct",
+      "param": [],
+      "input": ["close"],
+      "output": "daily_return"
+    },
+    {
+      "name": "Std",
+      "param": ["volatility_window"],
+      "input": ["daily_return"],
+      "output": "return_volatility"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "close_vwap_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_vwap_diff", "vwap"],
+      "output": "raw_vwap_dislocation"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["raw_vwap_dislocation", "return_volatility"],
+      "output": "vol_scaled_dislocation"
+    },
+    {
+      "name": "Diff",
+      "param": ["short_window"],
+      "input": ["vol_scaled_dislocation"],
+      "output": "dislocation_drift"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["dislocation_drift"],
+      "output": "drift_zscore"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["vol_scaled_dislocation"],
+      "output": "dislocation_zscore"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["dislocation_zscore"],
+      "output": "dislocation_gate"
+    },
+    {
+      "name": "Pct",
+      "param": ["short_window"],
+      "input": ["volume"],
+      "output": "volume_pct_change"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["volume_pct_change"],
+      "output": "volume_participation_trend"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["volume_participation_trend"],
+      "output": "participation_zscore"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["dislocation_gate", "participation_zscore"],
+      "output": "flow_confirmation"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_period"],
+      "input": ["volume"],
+      "output": "volume_baseline"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume", "volume_baseline"],
+      "output": "relative_volume"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["relative_volume"],
+      "output": "smoothed_relative_volume"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["vol_scaled_dislocation"],
+      "output": "dislocation_magnitude"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["dislocation_magnitude"],
+      "output": "smoothed_dislocation_magnitude"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["smoothed_relative_volume", "smoothed_dislocation_magnitude"],
+      "output": "participation_envelope"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["drift_zscore", "flow_confirmation"],
+      "output": "raw_composite_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["raw_composite_signal", "participation_envelope"],
+      "output": "scaled_composite_signal"
+    },
+    {
+      "name": "Ma",
+      "param": ["volatility_window"],
+      "input": ["scaled_composite_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "volatility_window": 20,
+      "short_window": 5,
+      "lookback_period": 60
+    },
+    {
+      "volatility_window": 15,
+      "short_window": 3,
+      "lookback_period": 40
+    },
+    {
+      "volatility_window": 30,
+      "short_window": 10,
+      "lookback_period": 90
+    }
+  ]
+}

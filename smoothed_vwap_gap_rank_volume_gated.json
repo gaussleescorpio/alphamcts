@@ -1,0 +1,99 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "close_minus_vwap"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_minus_vwap", "vwap"],
+      "output": "vwap_gap_normalized"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["vwap_gap_normalized"],
+      "output": "price_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_window"],
+      "input": ["price_rank"],
+      "output": "smoothed_price_rank"
+    },
+    {
+      "name": "Corr",
+      "param": ["volume_corr_window"],
+      "input": ["close", "volume"],
+      "output": "close_volume_corr"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["close_volume_corr"],
+      "output": "volume_corr_signal"
+    },
+    {
+      "name": "Autocorr",
+      "param": ["lookback_period"],
+      "input": ["volume"],
+      "output": "volume_autocorr_lag1"
+    },
+    {
+      "name": "Med",
+      "param": ["lookback_period"],
+      "input": ["volume_autocorr_lag1"],
+      "output": "volume_autocorr_median"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["volume_autocorr_lag1", "volume_autocorr_median"],
+      "output": "autocorr_excess"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["autocorr_excess"],
+      "output": "persistence_gate"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume_corr_signal", "persistence_gate"],
+      "output": "volume_confirmation"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["smoothed_price_rank", "volume_confirmation"],
+      "output": "raw_composite"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_window"],
+      "input": ["raw_composite"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_period": 20,
+      "smoothing_window": 5,
+      "volume_corr_window": 10
+    },
+    {
+      "lookback_period": 40,
+      "smoothing_window": 10,
+      "volume_corr_window": 20
+    },
+    {
+      "lookback_period": 60,
+      "smoothing_window": 8,
+      "volume_corr_window": 30
+    }
+  ]
+}

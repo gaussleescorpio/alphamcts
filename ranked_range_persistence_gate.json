@@ -1,0 +1,111 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_above_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_above_low", "daily_range"],
+      "output": "range_position"
+    },
+    {
+      "name": "Ma",
+      "param": ["core_smoothing_window"],
+      "input": ["range_position"],
+      "output": "smoothed_range_position"
+    },
+    {
+      "name": "Rank",
+      "param": ["normalization_window"],
+      "input": ["smoothed_range_position"],
+      "output": "normalized_core_signal"
+    },
+    {
+      "name": "Delay",
+      "param": [],
+      "input": ["range_position"],
+      "output": "lagged_range_position"
+    },
+    {
+      "name": "Corr",
+      "param": ["core_smoothing_window"],
+      "input": ["range_position", "lagged_range_position"],
+      "output": "range_persistence"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["range_persistence"],
+      "output": "persistence_filter"
+    },
+    {
+      "name": "Vari",
+      "param": ["core_smoothing_window"],
+      "input": ["volume"],
+      "output": "volume_coefficient_variation"
+    },
+    {
+      "name": "Vari",
+      "param": ["core_smoothing_window"],
+      "input": ["daily_range"],
+      "output": "range_coefficient_variation"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume_coefficient_variation", "range_coefficient_variation"],
+      "output": "volume_range_coherence"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["volume_range_coherence"],
+      "output": "volume_range_gate"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["normalized_core_signal", "persistence_filter"],
+      "output": "gated_core_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["gated_core_signal", "volume_range_gate"],
+      "output": "composite_signal"
+    },
+    {
+      "name": "Ma",
+      "param": ["composite_smoothing_window"],
+      "input": ["composite_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "core_smoothing_window": 20,
+      "normalization_window": 60,
+      "composite_smoothing_window": 10
+    },
+    {
+      "core_smoothing_window": 10,
+      "normalization_window": 40,
+      "composite_smoothing_window": 5
+    },
+    {
+      "core_smoothing_window": 40,
+      "normalization_window": 120,
+      "composite_smoothing_window": 20
+    }
+  ]
+}

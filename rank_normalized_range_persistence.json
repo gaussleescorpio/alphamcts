@@ -1,0 +1,189 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_minus_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_minus_low", "daily_range"],
+      "output": "close_position"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["daily_range", "vwap"],
+      "output": "range_vwap_ratio"
+    },
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["volume"],
+      "output": "log_volume"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_window"],
+      "input": ["close_position"],
+      "output": "smoothed_close_position"
+    },
+    {
+      "name": "Delay",
+      "param": ["smoothing_window"],
+      "input": ["smoothed_close_position"],
+      "output": "delayed_lag5_step1"
+    },
+    {
+      "name": "Delay",
+      "param": ["smoothing_window"],
+      "input": ["delayed_lag5_step1"],
+      "output": "delayed_lag10_step2"
+    },
+    {
+      "name": "Autocorr",
+      "param": ["lookback_period", "rank_window"],
+      "input": ["smoothed_close_position"],
+      "output": "autocorr_lag1"
+    },
+    {
+      "name": "Autocorr",
+      "param": ["lookback_period", "smoothing_window"],
+      "input": ["smoothed_close_position"],
+      "output": "autocorr_lag5"
+    },
+    {
+      "name": "Corr",
+      "param": ["lookback_period"],
+      "input": ["smoothed_close_position", "delayed_lag10_step2"],
+      "output": "autocorr_lag10"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["autocorr_lag1", "autocorr_lag5"],
+      "output": "persistence_pair"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["persistence_pair", "autocorr_lag10"],
+      "output": "persistence_sum"
+    },
+    {
+      "name": "Ma",
+      "param": ["rank_window"],
+      "input": ["persistence_sum"],
+      "output": "smoothed_persistence"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["smoothed_persistence"],
+      "output": "rank_persistence"
+    },
+    {
+      "name": "Corr",
+      "param": ["rank_window"],
+      "input": ["log_volume", "range_vwap_ratio"],
+      "output": "volume_corr_medium"
+    },
+    {
+      "name": "Corr",
+      "param": ["lookback_period"],
+      "input": ["log_volume", "range_vwap_ratio"],
+      "output": "volume_corr_long"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["volume_corr_medium", "volume_corr_long"],
+      "output": "volume_corr_blend"
+    },
+    {
+      "name": "Ma",
+      "param": ["rank_window"],
+      "input": ["volume_corr_blend"],
+      "output": "smoothed_volume"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["smoothed_volume"],
+      "output": "rank_volume"
+    },
+    {
+      "name": "Std",
+      "param": ["lookback_period"],
+      "input": ["close_position"],
+      "output": "std_close_position"
+    },
+    {
+      "name": "Std",
+      "param": ["lookback_period"],
+      "input": ["range_vwap_ratio"],
+      "output": "std_range_vwap"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["std_close_position"],
+      "output": "rank_std_close"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["std_range_vwap"],
+      "output": "rank_std_range"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["rank_std_close", "rank_std_range"],
+      "output": "volatility_denom"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["rank_persistence", "rank_volume"],
+      "output": "rank_numerator"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["rank_numerator", "volatility_denom"],
+      "output": "raw_signal"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_period"],
+      "input": ["raw_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "smoothing_window": 5,
+      "lookback_period": 20,
+      "rank_window": 20
+    },
+    {
+      "smoothing_window": 10,
+      "lookback_period": 60,
+      "rank_window": 40
+    },
+    {
+      "smoothing_window": 15,
+      "lookback_period": 120,
+      "rank_window": 40
+    }
+  ]
+}

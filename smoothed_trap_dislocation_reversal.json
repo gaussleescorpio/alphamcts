@@ -1,0 +1,40 @@
+{
+  "formula": [
+    {"name": "Pct", "param": ["return_lag_period"], "input": ["close"], "output": "daily_return"},
+    {"name": "Abs", "param": [], "input": ["daily_return"], "output": "abs_daily_return"},
+    {"name": "Std", "param": ["lookback_window"], "input": ["daily_return"], "output": "return_volatility"},
+    {"name": "Ma", "param": ["lookback_window"], "input": ["abs_daily_return"], "output": "typical_abs_return"},
+    {"name": "Max", "param": [], "input": ["abs_daily_return", "typical_abs_return"], "output": "floored_abs_return"},
+    {"name": "Add", "param": [], "input": ["high", "low"], "output": "hl_sum"},
+    {"name": "Add", "param": [], "input": ["close", "close"], "output": "close_times_two"},
+    {"name": "Div", "param": [], "input": ["close_times_two", "close"], "output": "price_two"},
+    {"name": "Div", "param": [], "input": ["hl_sum", "price_two"], "output": "mid_price"},
+    {"name": "Div", "param": [], "input": ["close", "mid_price"], "output": "close_to_mid_ratio"},
+    {"name": "Log", "param": [], "input": ["close_to_mid_ratio"], "output": "log_dislocation"},
+    {"name": "Div", "param": [], "input": ["log_dislocation", "return_volatility"], "output": "vol_adjusted_dislocation"},
+    {"name": "Ma", "param": ["lookback_window"], "input": ["volume"], "output": "avg_volume"},
+    {"name": "Div", "param": [], "input": ["avg_volume", "avg_volume"], "output": "unit_one"},
+    {"name": "Mul", "param": [], "input": ["avg_volume", "floored_abs_return"], "output": "scaled_move"},
+    {"name": "Add", "param": [], "input": ["scaled_move", "unit_one"], "output": "effort_denominator"},
+    {"name": "Div", "param": [], "input": ["volume", "effort_denominator"], "output": "effort_result_ratio"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "session_range"},
+    {"name": "Add", "param": [], "input": ["session_range", "unit_one"], "output": "range_with_epsilon"},
+    {"name": "Sub", "param": [], "input": ["close", "low"], "output": "close_above_low"},
+    {"name": "Div", "param": [], "input": ["close_above_low", "range_with_epsilon"], "output": "close_range_position"},
+    {"name": "Div", "param": [], "input": ["close", "close_times_two"], "output": "half_reference"},
+    {"name": "Sub", "param": [], "input": ["close_range_position", "half_reference"], "output": "range_position_deviation"},
+    {"name": "Abs", "param": [], "input": ["range_position_deviation"], "output": "location_deviation"},
+    {"name": "Div", "param": [], "input": ["half_reference", "price_two"], "output": "quarter_band"},
+    {"name": "Greater", "param": [], "input": ["location_deviation", "quarter_band"], "output": "extreme_location_flag"},
+    {"name": "Mul", "param": [], "input": ["location_deviation", "extreme_location_flag"], "output": "range_location_gate"},
+    {"name": "Mul", "param": [], "input": ["vol_adjusted_dislocation", "effort_result_ratio"], "output": "raw_composite"},
+    {"name": "Mul", "param": [], "input": ["raw_composite", "range_location_gate"], "output": "gated_composite"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["gated_composite"], "output": "smoothed_composite"},
+    {"name": "Neg", "param": [], "input": ["smoothed_composite"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"return_lag_period": 1, "lookback_window": 20, "smoothing_window": 5},
+    {"return_lag_period": 1, "lookback_window": 15, "smoothing_window": 3},
+    {"return_lag_period": 1, "lookback_window": 30, "smoothing_window": 10}
+  ]
+}

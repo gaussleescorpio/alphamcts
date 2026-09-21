@@ -1,0 +1,63 @@
+{
+  "formula": [
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["close"],
+      "output": "log_close"
+    },
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["volume"],
+      "output": "log_volume"
+    },
+    {
+      "name": "Diff",
+      "param": ["change_lag"],
+      "input": ["log_close"],
+      "output": "log_price_change"
+    },
+    {
+      "name": "Diff",
+      "param": ["change_lag"],
+      "input": ["log_volume"],
+      "output": "log_volume_change"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["log_price_change"],
+      "output": "price_direction"
+    },
+    {
+      "name": "Corr",
+      "param": ["correlation_window"],
+      "input": ["price_direction", "log_volume_change"],
+      "output": "directional_volume_correlation"
+    },
+    {
+      "name": "Zscore",
+      "param": ["zscore_window"],
+      "input": ["directional_volume_correlation"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "change_lag": 1,
+      "correlation_window": 10,
+      "zscore_window": 60
+    },
+    {
+      "change_lag": 1,
+      "correlation_window": 15,
+      "zscore_window": 90
+    },
+    {
+      "change_lag": 1,
+      "correlation_window": 20,
+      "zscore_window": 120
+    }
+  ]
+}

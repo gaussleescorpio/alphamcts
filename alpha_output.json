@@ -1,0 +1,24 @@
+{
+  "name": "smoothed_finish_quality_persistence",
+  "description": "Finds stocks whose multi-day closing bias within the daily range (close versus VWAP) stays persistent and moves with volume. Input smoothing cuts one-day range noise; longer ranks on persistence and volume alignment treat finish-quality leadership as a slower regime, and a short moving average of the combined score reduces churn before trading.",
+  "pseudo_code": [
+    "daily_range = Sub(input=[high, low], param=[])",
+    "close_minus_vwap = Sub(input=[close, vwap], param=[])",
+    "raw_intraday_position = Div(input=[close_minus_vwap, daily_range], param=[])",
+    "smoothed_intraday_position = Ma(input=[raw_intraday_position], param=[positioning_smooth_window])",
+    "ranked_finish_position = Rank(input=[smoothed_intraday_position], param=[estimation_window])",
+    "finish_position_autocorr = Autocorr(input=[ranked_finish_position], param=[estimation_window, autocorr_lag])",
+    "ranked_finish_autocorr = Rank(input=[finish_position_autocorr], param=[persistence_rank_window])",
+    "finish_volume_correlation = Corr(input=[ranked_finish_position, volume], param=[estimation_window])",
+    "ranked_finish_volume_corr = Rank(input=[finish_volume_correlation], param=[persistence_rank_window])",
+    "rank_leg_difference = Sub(input=[ranked_finish_autocorr, ranked_finish_volume_corr], param=[])",
+    "abs_rank_leg_difference = Abs(input=[rank_leg_difference], param=[])",
+    "dual_leg_sum = Add(input=[ranked_finish_autocorr, ranked_finish_volume_corr], param=[])",
+    "confirmed_dual_leg_numerator = Sub(input=[dual_leg_sum, abs_rank_leg_difference], param=[])",
+    "unit_scale = Div(input=[Ma(input=[close], param=[estimation_window]), Ma(input=[close], param=[estimation_window])], param=[])",
+    "dual_leg_denominator = Add(input=[unit_scale, unit_scale], param=[])",
+    "dual_leg_composite = Div(input=[confirmed_dual_leg_numerator, dual_leg_denominator], param=[])",
+    "smoothed_composite = Ma(input=[dual_leg_composite], param=[positioning_smooth_window])",
+    "alpha = Rank(input=[smoothed_composite], param=[persistence_rank_window])"
+  ]
+}

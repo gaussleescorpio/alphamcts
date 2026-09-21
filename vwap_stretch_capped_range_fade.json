@@ -1,0 +1,24 @@
+{
+  "formula": [
+    {"name": "Div", "param": [], "input": ["close", "close"], "output": "unity"},
+    {"name": "Sum", "param": ["range_cap_numerator_window"], "input": ["unity"], "output": "range_cap_numerator"},
+    {"name": "Sum", "param": ["range_cap_denominator_window"], "input": ["unity"], "output": "range_cap_denominator"},
+    {"name": "Div", "param": [], "input": ["range_cap_numerator", "range_cap_denominator"], "output": "range_cap_scalar"},
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "price_vwap_spread"},
+    {"name": "Zscore", "param": ["stretch_window"], "input": ["price_vwap_spread"], "output": "stretch_zscore"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Ma", "param": ["range_window"], "input": ["daily_range"], "output": "average_daily_range"},
+    {"name": "Div", "param": [], "input": ["daily_range", "average_daily_range"], "output": "range_expansion_ratio"},
+    {"name": "Sub", "param": [], "input": ["range_expansion_ratio", "range_cap_scalar"], "output": "range_excess_over_cap"},
+    {"name": "Greater", "param": [], "input": ["range_expansion_ratio", "range_cap_scalar"], "output": "is_range_above_cap"},
+    {"name": "Mul", "param": [], "input": ["is_range_above_cap", "range_excess_over_cap"], "output": "range_trim_amount"},
+    {"name": "Sub", "param": [], "input": ["range_expansion_ratio", "range_trim_amount"], "output": "capped_range_filter"},
+    {"name": "Mul", "param": [], "input": ["stretch_zscore", "capped_range_filter"], "output": "combined_signal"},
+    {"name": "Neg", "param": [], "input": ["combined_signal"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"stretch_window": 40, "range_window": 20, "range_cap_numerator_window": 3, "range_cap_denominator_window": 2},
+    {"stretch_window": 60, "range_window": 10, "range_cap_numerator_window": 4, "range_cap_denominator_window": 2},
+    {"stretch_window": 20, "range_window": 30, "range_cap_numerator_window": 7, "range_cap_denominator_window": 4}
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "formula": [
+    {
+      "name": "Pct",
+      "param": [],
+      "input": ["close"],
+      "output": "daily_return"
+    },
+    {
+      "name": "Pct",
+      "param": ["momentum_window"],
+      "input": ["close"],
+      "output": "momentum"
+    },
+    {
+      "name": "Std",
+      "param": ["volatility_window"],
+      "input": ["daily_return"],
+      "output": "return_volatility"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["momentum", "return_volatility"],
+      "output": "risk_adjusted_momentum"
+    },
+    {
+      "name": "Rank",
+      "param": ["normalization_window"],
+      "input": ["risk_adjusted_momentum"],
+      "output": "ranked_signal"
+    },
+    {
+      "name": "Zscore",
+      "param": ["normalization_window"],
+      "input": ["ranked_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "momentum_window": 20,
+      "volatility_window": 20,
+      "normalization_window": 60
+    },
+    {
+      "momentum_window": 40,
+      "volatility_window": 40,
+      "normalization_window": 90
+    },
+    {
+      "momentum_window": 60,
+      "volatility_window": 60,
+      "normalization_window": 120
+    }
+  ]
+}

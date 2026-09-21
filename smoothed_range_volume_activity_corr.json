@@ -1,0 +1,99 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_above_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_above_low", "daily_range"],
+      "output": "close_in_range"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["close_in_range"],
+      "output": "close_in_range_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["rank_window"],
+      "input": ["close_in_range_rank"],
+      "output": "smoothed_close_in_range"
+    },
+    {
+      "name": "Ma",
+      "param": ["rank_window"],
+      "input": ["volume"],
+      "output": "average_volume"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume", "average_volume"],
+      "output": "relative_volume"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["relative_volume"],
+      "output": "volume_activity_rank"
+    },
+    {
+      "name": "Corr",
+      "param": ["short_correlation_window"],
+      "input": ["smoothed_close_in_range", "volume_activity_rank"],
+      "output": "short_horizon_corr"
+    },
+    {
+      "name": "Corr",
+      "param": ["long_correlation_window"],
+      "input": ["smoothed_close_in_range", "volume_activity_rank"],
+      "output": "long_horizon_corr"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["short_horizon_corr", "short_horizon_corr"],
+      "output": "short_horizon_corr_normalized"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["long_horizon_corr", "long_horizon_corr"],
+      "output": "long_horizon_corr_normalized"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["short_horizon_corr_normalized", "long_horizon_corr_normalized"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "rank_window": 20,
+      "short_correlation_window": 10,
+      "long_correlation_window": 60
+    },
+    {
+      "rank_window": 40,
+      "short_correlation_window": 20,
+      "long_correlation_window": 90
+    },
+    {
+      "rank_window": 60,
+      "short_correlation_window": 30,
+      "long_correlation_window": 120
+    }
+  ]
+}

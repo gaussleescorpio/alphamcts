@@ -1,0 +1,192 @@
+{
+  "formula": [
+    {
+      "name": "Delay",
+      "param": ["prior_close_lag"],
+      "input": ["close"],
+      "output": "prior_close"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "close_vwap_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_vwap_diff", "vwap"],
+      "output": "vwap_dislocation"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "close_open_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_open_diff", "vwap"],
+      "output": "intraday_drift"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["open", "prior_close"],
+      "output": "open_prior_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["open_prior_diff", "vwap"],
+      "output": "overnight_gap"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["intraday_drift", "overnight_gap"],
+      "output": "net_vwap_drift"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Vari",
+      "param": ["zscore_window"],
+      "input": ["close"],
+      "output": "close_vari"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["close", "close_vari"],
+      "output": "range_floor"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["daily_range", "range_floor"],
+      "output": "range_diff"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["range_diff"],
+      "output": "abs_range_diff"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["daily_range", "range_floor"],
+      "output": "range_sum"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["range_sum", "abs_range_diff"],
+      "output": "range_max_numerator"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close", "close"],
+      "output": "unity_ratio"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["unity_ratio", "unity_ratio"],
+      "output": "two"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["range_max_numerator", "two"],
+      "output": "stable_range"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["close_open_diff"],
+      "output": "abs_close_open"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["abs_close_open", "stable_range"],
+      "output": "range_consumption"
+    },
+    {
+      "name": "Pct",
+      "param": ["price_volume_lag"],
+      "input": ["close"],
+      "output": "close_momentum"
+    },
+    {
+      "name": "Pct",
+      "param": ["price_volume_lag"],
+      "input": ["volume"],
+      "output": "volume_momentum"
+    },
+    {
+      "name": "Corr",
+      "param": ["correlation_window"],
+      "input": ["close_momentum", "volume_momentum"],
+      "output": "price_volume_corr"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["unity_ratio", "price_volume_corr"],
+      "output": "participation_quality"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["vwap_dislocation", "net_vwap_drift"],
+      "output": "raw_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["raw_signal", "range_consumption"],
+      "output": "weighted_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["weighted_signal", "participation_quality"],
+      "output": "filtered_signal"
+    },
+    {
+      "name": "Zscore",
+      "param": ["zscore_window"],
+      "input": ["filtered_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "prior_close_lag": 1,
+      "zscore_window": 20,
+      "price_volume_lag": 5,
+      "correlation_window": 20
+    },
+    {
+      "prior_close_lag": 1,
+      "zscore_window": 10,
+      "price_volume_lag": 3,
+      "correlation_window": 10
+    },
+    {
+      "prior_close_lag": 1,
+      "zscore_window": 60,
+      "price_volume_lag": 10,
+      "correlation_window": 40
+    }
+  ]
+}

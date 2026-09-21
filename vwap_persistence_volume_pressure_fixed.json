@@ -1,0 +1,66 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "vwap_gap"},
+    {"name": "Zscore", "param": ["zscore_window"], "input": ["vwap_gap"], "output": "vwap_gap_zscore"},
+    {"name": "Sign", "param": [], "input": ["vwap_gap_zscore"], "output": "sign_vwap_gap"},
+    {"name": "Delay", "param": ["short_window"], "input": ["vwap_gap_zscore"], "output": "delayed_vwap_gap_zscore_lag1"},
+    {"name": "Sign", "param": [], "input": ["delayed_vwap_gap_zscore_lag1"], "output": "sign_delayed_vwap_gap_lag1"},
+    {"name": "Mul", "param": [], "input": ["sign_vwap_gap", "sign_delayed_vwap_gap_lag1"], "output": "lag1_sign_agreement"},
+    {"name": "Delay", "param": ["short_window"], "input": ["delayed_vwap_gap_zscore_lag1"], "output": "delayed_vwap_gap_zscore_lag2"},
+    {"name": "Sign", "param": [], "input": ["delayed_vwap_gap_zscore_lag2"], "output": "sign_delayed_vwap_gap_lag2"},
+    {"name": "Mul", "param": [], "input": ["sign_vwap_gap", "sign_delayed_vwap_gap_lag2"], "output": "lag2_sign_agreement"},
+    {"name": "Delay", "param": ["short_window"], "input": ["delayed_vwap_gap_zscore_lag2"], "output": "delayed_vwap_gap_zscore_lag3"},
+    {"name": "Sign", "param": [], "input": ["delayed_vwap_gap_zscore_lag3"], "output": "sign_delayed_vwap_gap_lag3"},
+    {"name": "Mul", "param": [], "input": ["sign_vwap_gap", "sign_delayed_vwap_gap_lag3"], "output": "lag3_sign_agreement"},
+    {"name": "Delay", "param": ["short_window"], "input": ["delayed_vwap_gap_zscore_lag3"], "output": "delayed_vwap_gap_zscore_lag4"},
+    {"name": "Sign", "param": [], "input": ["delayed_vwap_gap_zscore_lag4"], "output": "sign_delayed_vwap_gap_lag4"},
+    {"name": "Mul", "param": [], "input": ["sign_vwap_gap", "sign_delayed_vwap_gap_lag4"], "output": "lag4_sign_agreement"},
+    {"name": "Delay", "param": ["short_window"], "input": ["delayed_vwap_gap_zscore_lag4"], "output": "delayed_vwap_gap_zscore_lag5"},
+    {"name": "Sign", "param": [], "input": ["delayed_vwap_gap_zscore_lag5"], "output": "sign_delayed_vwap_gap_lag5"},
+    {"name": "Mul", "param": [], "input": ["sign_vwap_gap", "sign_delayed_vwap_gap_lag5"], "output": "lag5_sign_agreement"},
+    {"name": "Add", "param": [], "input": ["lag1_sign_agreement", "lag2_sign_agreement"], "output": "persistence_sum_lag12"},
+    {"name": "Add", "param": [], "input": ["persistence_sum_lag12", "lag3_sign_agreement"], "output": "persistence_sum_lag123"},
+    {"name": "Add", "param": [], "input": ["persistence_sum_lag123", "lag4_sign_agreement"], "output": "persistence_sum_lag1234"},
+    {"name": "Add", "param": [], "input": ["persistence_sum_lag1234", "lag5_sign_agreement"], "output": "multi_lag_persistence_score"},
+    {"name": "Rank", "param": ["long_window"], "input": ["multi_lag_persistence_score"], "output": "persistence_rank"},
+    {"name": "Rank", "param": ["short_window"], "input": ["vwap_gap_zscore"], "output": "ranked_vwap_gap_zscore"},
+    {"name": "Diff", "param": ["short_window"], "input": ["volume"], "output": "volume_change"},
+    {"name": "Rank", "param": ["short_window"], "input": ["volume_change"], "output": "ranked_volume_change"},
+    {"name": "Corr", "param": ["long_window"], "input": ["ranked_vwap_gap_zscore", "ranked_volume_change"], "output": "price_volume_co_movement"},
+    {"name": "Sum", "param": ["short_window"], "input": ["sign_vwap_gap"], "output": "directional_sign_sum"},
+    {"name": "Sign", "param": [], "input": ["directional_sign_sum"], "output": "directional_bias"},
+    {"name": "Mul", "param": [], "input": ["price_volume_co_movement", "directional_bias"], "output": "volume_confirmed_pressure"},
+    {"name": "Rank", "param": ["long_window"], "input": ["volume_confirmed_pressure"], "output": "volume_pressure_rank"},
+    {"name": "Diff", "param": ["short_window"], "input": ["vwap_gap"], "output": "gap_momentum"},
+    {"name": "Vari", "param": ["short_window"], "input": ["vwap_gap"], "output": "gap_variation"},
+    {"name": "Neg", "param": [], "input": ["close"], "output": "neg_close"},
+    {"name": "Greater", "param": [], "input": ["close", "neg_close"], "output": "unit_indicator"},
+    {"name": "Sum", "param": ["long_window"], "input": ["unit_indicator"], "output": "window_scale"},
+    {"name": "Inverse", "param": [], "input": ["window_scale"], "output": "variance_stabilizer"},
+    {"name": "Add", "param": [], "input": ["gap_variation", "variance_stabilizer"], "output": "stabilized_gap_variation"},
+    {"name": "Div", "param": [], "input": ["gap_momentum", "stabilized_gap_variation"], "output": "volatility_adjusted_gap_momentum"},
+    {"name": "Zscore", "param": ["zscore_window"], "input": ["volatility_adjusted_gap_momentum"], "output": "volatility_adjusted_gap_momentum_zscore"},
+    {"name": "Rank", "param": ["long_window"], "input": ["volatility_adjusted_gap_momentum_zscore"], "output": "gap_momentum_rank"},
+    {"name": "Add", "param": [], "input": ["persistence_rank", "gap_momentum_rank"], "output": "persistence_plus_momentum_rank"},
+    {"name": "Add", "param": [], "input": ["persistence_plus_momentum_rank", "volume_pressure_rank"], "output": "combined_alpha_score"},
+    {"name": "Rank", "param": ["long_window"], "input": ["combined_alpha_score"], "output": "cross_sectional_alpha"},
+    {"name": "Ma", "param": ["short_window"], "input": ["cross_sectional_alpha"], "output": "alpha"}
+  ],
+  "arguments": [
+    {
+      "zscore_window": 10,
+      "long_window": 20,
+      "short_window": 5
+    },
+    {
+      "zscore_window": 20,
+      "long_window": 40,
+      "short_window": 10
+    },
+    {
+      "zscore_window": 15,
+      "long_window": 60,
+      "short_window": 3
+    }
+  ]
+}

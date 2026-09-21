@@ -1,0 +1,132 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "vwap_gap"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "close"],
+      "output": "zero_reference"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close", "close"],
+      "output": "unity_reference"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["unity_reference", "unity_reference"],
+      "output": "double_unity_reference"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["unity_reference", "double_unity_reference"],
+      "output": "half_reference"
+    },
+    {
+      "name": "Std",
+      "param": ["pressure_window"],
+      "input": ["close"],
+      "output": "close_volatility"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["vwap_gap", "close_volatility"],
+      "output": "normalized_vwap_gap"
+    },
+    {
+      "name": "Rank",
+      "param": ["pressure_window"],
+      "input": ["normalized_vwap_gap"],
+      "output": "gap_rank"
+    },
+    {
+      "name": "Zscore",
+      "param": ["confirmation_window"],
+      "input": ["volume"],
+      "output": "volume_zscore"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["volume_zscore"],
+      "output": "volume_tanh"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["half_reference", "volume_tanh"],
+      "output": "volume_tanh_scaled"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["half_reference", "volume_tanh_scaled"],
+      "output": "volume_conviction"
+    },
+    {
+      "name": "Corr",
+      "param": ["confirmation_window"],
+      "input": ["vwap_gap", "volume"],
+      "output": "gap_volume_correlation"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["gap_volume_correlation", "zero_reference"],
+      "output": "correlation_is_positive"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["gap_volume_correlation", "correlation_is_positive"],
+      "output": "positive_correlation"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["half_reference", "positive_correlation"],
+      "output": "positive_correlation_scaled"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["half_reference", "positive_correlation_scaled"],
+      "output": "correlation_conviction"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["correlation_conviction", "volume_conviction"],
+      "output": "conviction_multiplier"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["gap_rank", "conviction_multiplier"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "pressure_window": 10,
+      "confirmation_window": 20
+    },
+    {
+      "pressure_window": 20,
+      "confirmation_window": 60
+    },
+    {
+      "pressure_window": 5,
+      "confirmation_window": 10
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "formula": [
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["vwap"],
+      "output": "log_vwap"
+    },
+    {
+      "name": "Diff",
+      "param": ["return_lag_period"],
+      "input": ["log_vwap"],
+      "output": "daily_return"
+    },
+    {
+      "name": "Std",
+      "param": ["lookback_period"],
+      "input": ["daily_return"],
+      "output": "long_volatility"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_period"],
+      "input": ["log_vwap"],
+      "output": "ma_log_vwap_long"
+    },
+    {
+      "name": "Diff",
+      "param": ["lookback_period"],
+      "input": ["ma_log_vwap_long"],
+      "output": "long_trend_slope"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["vwap"],
+      "output": "unit_signal"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["unit_signal"],
+      "output": "unit_signal_abs"
+    },
+    {
+      "name": "Sum",
+      "param": ["lookback_period"],
+      "input": ["unit_signal_abs"],
+      "output": "lookback_period_scalar"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["long_volatility", "lookback_period_scalar"],
+      "output": "volatility_scaled_denominator"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["long_trend_slope", "volatility_scaled_denominator"],
+      "output": "vol_normalized_trend"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["log_vwap"],
+      "output": "ma_log_vwap_short"
+    },
+    {
+      "name": "Diff",
+      "param": ["short_window"],
+      "input": ["ma_log_vwap_short"],
+      "output": "short_trend_slope"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["short_trend_slope"],
+      "output": "trend_direction"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["vol_normalized_trend"],
+      "output": "vol_normalized_trend_zscore"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["vol_normalized_trend_zscore", "trend_direction"],
+      "output": "trend_coherence_leg"
+    },
+    {
+      "name": "Delay",
+      "param": ["return_lag_period"],
+      "input": ["daily_return"],
+      "output": "lagged_daily_return"
+    },
+    {
+      "name": "Corr",
+      "param": ["microstructure_window"],
+      "input": ["daily_return", "lagged_daily_return"],
+      "output": "return_serial_dependence"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["return_serial_dependence"],
+      "output": "return_serial_dependence_zscore"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["return_serial_dependence_zscore"],
+      "output": "quietness_leg"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["daily_return"],
+      "output": "absolute_daily_return"
+    },
+    {
+      "name": "Ma",
+      "param": ["microstructure_window"],
+      "input": ["volume"],
+      "output": "ma_volume"
+    },
+    {
+      "name": "Ma",
+      "param": ["microstructure_window"],
+      "input": ["absolute_daily_return"],
+      "output": "ma_absolute_daily_return"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["ma_volume", "ma_absolute_daily_return"],
+      "output": "volume_per_price_move"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["volume_per_price_move"],
+      "output": "participation_leg"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["trend_coherence_leg", "quietness_leg"],
+      "output": "coherence_quietness_sum"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["coherence_quietness_sum", "participation_leg"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_period": 60,
+      "short_window": 10,
+      "microstructure_window": 5,
+      "return_lag_period": 1
+    },
+    {
+      "lookback_period": 40,
+      "short_window": 5,
+      "microstructure_window": 10,
+      "return_lag_period": 1
+    },
+    {
+      "lookback_period": 20,
+      "short_window": 3,
+      "microstructure_window": 5,
+      "return_lag_period": 1
+    }
+  ]
+}

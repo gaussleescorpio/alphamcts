@@ -1,0 +1,32 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "range_span"},
+    {"name": "Sub", "param": [], "input": ["close", "low"], "output": "close_offset"},
+    {"name": "Div", "param": [], "input": ["close_offset", "range_span"], "output": "close_position"},
+    {"name": "Sub", "param": [], "input": ["vwap", "low"], "output": "vwap_offset"},
+    {"name": "Div", "param": [], "input": ["vwap_offset", "range_span"], "output": "vwap_position"},
+    {"name": "Sub", "param": [], "input": ["close_position", "vwap_position"], "output": "intraday_gap"},
+    {"name": "Ma", "param": ["gap_smooth_window"], "input": ["intraday_gap"], "output": "smoothed_gap"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["smoothed_gap"], "output": "gap_rank"},
+    {"name": "Ma", "param": ["gap_smooth_window"], "input": ["gap_rank"], "output": "smoothed_gap_rank"},
+    {"name": "Div", "param": [], "input": ["range_span", "vwap"], "output": "range_ratio"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["range_ratio"], "output": "range_rank"},
+    {"name": "Med", "param": ["rank_window"], "input": ["range_rank"], "output": "range_rank_median"},
+    {"name": "Sub", "param": [], "input": ["range_rank", "range_rank_median"], "output": "range_rank_vs_median_diff"},
+    {"name": "Greater", "param": [], "input": ["range_rank", "range_rank_median"], "output": "range_rank_above_median"},
+    {"name": "Mul", "param": [], "input": ["range_rank_above_median", "range_rank_vs_median_diff"], "output": "range_rank_excess_over_median"},
+    {"name": "Add", "param": [], "input": ["range_rank_median", "range_rank_excess_over_median"], "output": "range_quality_gate"},
+    {"name": "Ma", "param": ["gap_smooth_window"], "input": ["range_quality_gate"], "output": "smoothed_range_gate"},
+    {"name": "Mul", "param": [], "input": ["smoothed_gap_rank", "smoothed_range_gate"], "output": "rank_core"},
+    {"name": "Corr", "param": ["confirm_window"], "input": ["volume", "smoothed_gap"], "output": "volume_gap_corr"},
+    {"name": "Ma", "param": ["gap_smooth_window"], "input": ["volume_gap_corr"], "output": "smoothed_volume_corr"},
+    {"name": "Sign", "param": [], "input": ["smoothed_volume_corr"], "output": "volume_confirm"},
+    {"name": "Mul", "param": [], "input": ["rank_core", "volume_confirm"], "output": "composite_signal"},
+    {"name": "Ma", "param": ["confirm_window"], "input": ["composite_signal"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"gap_smooth_window": 5, "rank_window": 20, "confirm_window": 60},
+    {"gap_smooth_window": 10, "rank_window": 40, "confirm_window": 90},
+    {"gap_smooth_window": 3, "rank_window": 15, "confirm_window": 30}
+  ]
+}

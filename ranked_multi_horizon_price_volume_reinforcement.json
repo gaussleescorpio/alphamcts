@@ -1,0 +1,165 @@
+{
+  "formula": [
+    {
+      "name": "Pct",
+      "param": ["momentum_window"],
+      "input": ["close"],
+      "output": "price_short_change"
+    },
+    {
+      "name": "Pct",
+      "param": ["trend_window"],
+      "input": ["close"],
+      "output": "price_long_change"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_short_change"],
+      "output": "sign_short_change"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_long_change"],
+      "output": "sign_long_change"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["sign_short_change", "sign_long_change"],
+      "output": "direction_agreement"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["price_short_change"],
+      "output": "abs_short_change"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["price_long_change"],
+      "output": "abs_long_change"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["abs_short_change", "abs_long_change"],
+      "output": "abs_magnitude_diff"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["abs_magnitude_diff"],
+      "output": "abs_magnitude_gap"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["abs_short_change", "abs_long_change"],
+      "output": "abs_magnitude_sum"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["abs_magnitude_sum", "abs_magnitude_gap"],
+      "output": "min_magnitude_numerator"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["close"],
+      "output": "close_sign"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["close_sign", "close_sign"],
+      "output": "min_magnitude_divisor"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["min_magnitude_numerator", "min_magnitude_divisor"],
+      "output": "min_price_magnitude"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["direction_agreement", "min_price_magnitude"],
+      "output": "filtered_price_momentum"
+    },
+    {
+      "name": "Pct",
+      "param": ["momentum_window"],
+      "input": ["volume"],
+      "output": "volume_change"
+    },
+    {
+      "name": "Corr",
+      "param": ["trend_window"],
+      "input": ["price_short_change", "volume_change"],
+      "output": "price_volume_correlation"
+    },
+    {
+      "name": "Rank",
+      "param": ["signal_window"],
+      "input": ["filtered_price_momentum"],
+      "output": "ranked_price_momentum"
+    },
+    {
+      "name": "Rank",
+      "param": ["signal_window"],
+      "input": ["volume_change"],
+      "output": "ranked_volume_change"
+    },
+    {
+      "name": "Rank",
+      "param": ["signal_window"],
+      "input": ["price_volume_correlation"],
+      "output": "ranked_correlation"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["ranked_price_momentum", "ranked_volume_change"],
+      "output": "partial_combined_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["partial_combined_signal", "ranked_correlation"],
+      "output": "combined_signal"
+    },
+    {
+      "name": "Rank",
+      "param": ["signal_window"],
+      "input": ["combined_signal"],
+      "output": "anchored_signal"
+    },
+    {
+      "name": "Zscore",
+      "param": ["signal_window"],
+      "input": ["anchored_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "momentum_window": 5,
+      "trend_window": 20,
+      "signal_window": 60
+    },
+    {
+      "momentum_window": 10,
+      "trend_window": 40,
+      "signal_window": 60
+    },
+    {
+      "momentum_window": 5,
+      "trend_window": 60,
+      "signal_window": 120
+    }
+  ]
+}

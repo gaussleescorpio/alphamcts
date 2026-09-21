@@ -1,0 +1,183 @@
+{
+  "formula": [
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["volume"],
+      "output": "log_volume"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "close_change"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "range_span"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_above_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_above_low", "range_span"],
+      "output": "daily_range_position"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_window"],
+      "input": ["daily_range_position"],
+      "output": "smoothed_close_position"
+    },
+    {
+      "name": "Ma",
+      "param": ["trend_lag"],
+      "input": ["close"],
+      "output": "short_moving_avg"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_period"],
+      "input": ["close"],
+      "output": "long_moving_avg"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["short_moving_avg", "long_moving_avg"],
+      "output": "trend_ratio"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["trend_ratio"],
+      "output": "trend_rank"
+    },
+    {
+      "name": "Corr",
+      "param": ["lookback_period"],
+      "input": ["log_volume", "close_change"],
+      "output": "long_volume_price_corr"
+    },
+    {
+      "name": "Corr",
+      "param": ["trend_lag"],
+      "input": ["log_volume", "close_change"],
+      "output": "short_volume_price_corr"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["long_volume_price_corr", "short_volume_price_corr"],
+      "output": "corr_above_short_window"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_window"],
+      "input": ["long_volume_price_corr"],
+      "output": "smoothed_volume_price_corr"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["long_volume_price_corr", "smoothed_volume_price_corr"],
+      "output": "corr_above_smoothed_baseline"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["corr_above_short_window", "corr_above_smoothed_baseline"],
+      "output": "volume_price_alignment_gate"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["smoothed_close_position", "trend_rank"],
+      "output": "close_trend_product"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["close_trend_product", "volume_price_alignment_gate"],
+      "output": "gated_close_trend_signal"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["gated_close_trend_signal"],
+      "output": "first_leg_rank"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["long_volume_price_corr", "volume_price_alignment_gate"],
+      "output": "gated_volume_price_corr"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["gated_volume_price_corr"],
+      "output": "second_leg_rank"
+    },
+    {
+      "name": "Std",
+      "param": ["lookback_period"],
+      "input": ["close_change"],
+      "output": "return_volatility"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["return_volatility"],
+      "output": "volatility_rank"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["first_leg_rank", "second_leg_rank"],
+      "output": "ranked_legs_sum"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["ranked_legs_sum", "volatility_rank"],
+      "output": "raw_composite"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_window"],
+      "input": ["raw_composite"],
+      "output": "smoothed_composite"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["smoothed_composite"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_period": 60,
+      "trend_lag": 20,
+      "smoothing_window": 5
+    },
+    {
+      "lookback_period": 90,
+      "trend_lag": 30,
+      "smoothing_window": 10
+    },
+    {
+      "lookback_period": 40,
+      "trend_lag": 10,
+      "smoothing_window": 3
+    }
+  ]
+}

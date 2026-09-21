@@ -1,0 +1,4 @@
+{
+  "reason": "The VWAP-pressure theme is economically plausible and Step 1 refinements were rationale-driven, but the final expression is substantially more opaque and structurally divergent (Diff/Std/Corr with many lookbacks) than the documented path, effectiveness and stability remained at zero while turnover was optimized, and parameter windows appear tuned without validation—indicating moderate-to-high overfitting risk.",
+  "score": 3
+}

@@ -1,0 +1,135 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "close_vwap_spread"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["close_vwap_spread", "volume"],
+      "output": "volume_weighted_spread"
+    },
+    {
+      "name": "Ma",
+      "param": ["placement_window"],
+      "input": ["volume_weighted_spread"],
+      "output": "avg_volume_weighted_spread"
+    },
+    {
+      "name": "Ma",
+      "param": ["placement_window"],
+      "input": ["volume"],
+      "output": "avg_volume"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["avg_volume_weighted_spread", "avg_volume"],
+      "output": "volume_weighted_vwap_placement"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["volume_weighted_vwap_placement"],
+      "output": "placement_channel_rank"
+    },
+    {
+      "name": "Diff",
+      "param": ["drift_lag"],
+      "input": ["close"],
+      "output": "close_change"
+    },
+    {
+      "name": "Diff",
+      "param": ["drift_lag"],
+      "input": ["volume"],
+      "output": "volume_change"
+    },
+    {
+      "name": "Corr",
+      "param": ["placement_window"],
+      "input": ["close_change", "volume_change"],
+      "output": "price_volume_coordination"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_volume_coordination"],
+      "output": "coordination_sign"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_change", "avg_volume"],
+      "output": "drift_per_avg_volume"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["drift_per_avg_volume", "coordination_sign"],
+      "output": "gated_drift_surprise"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["gated_drift_surprise"],
+      "output": "drift_channel_rank"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["placement_channel_rank", "drift_channel_rank"],
+      "output": "placement_dominates_drift"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["drift_channel_rank", "placement_channel_rank"],
+      "output": "drift_dominates_placement"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["placement_channel_rank", "placement_dominates_drift"],
+      "output": "dominant_placement_component"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["drift_channel_rank", "drift_dominates_placement"],
+      "output": "dominant_drift_component"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["dominant_placement_component", "dominant_drift_component"],
+      "output": "dominant_channel_rank"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["dominant_channel_rank"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "placement_window": 20,
+      "rank_window": 60,
+      "drift_lag": 5
+    },
+    {
+      "placement_window": 10,
+      "rank_window": 40,
+      "drift_lag": 3
+    },
+    {
+      "placement_window": 30,
+      "rank_window": 90,
+      "drift_lag": 10
+    }
+  ]
+}

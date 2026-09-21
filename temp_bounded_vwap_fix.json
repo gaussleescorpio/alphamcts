@@ -1,0 +1,138 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "vwap_dislocation"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["vwap_dislocation"],
+      "output": "vwap_dislocation_zscore"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close", "close"],
+      "output": "unity"
+    },
+    {
+      "name": "Sum",
+      "param": ["zscore_clip_cap"],
+      "input": ["unity"],
+      "output": "zscore_clip_cap_scalar"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["vwap_dislocation_zscore", "zscore_clip_cap_scalar"],
+      "output": "vwap_z_scaled"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["vwap_z_scaled"],
+      "output": "vwap_z_bounded"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["vwap_z_bounded", "zscore_clip_cap_scalar"],
+      "output": "vwap_z_clipped"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["vwap_z_clipped"],
+      "output": "vwap_discount_signal"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["volume"],
+      "output": "volume_zscore"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume_zscore", "zscore_clip_cap_scalar"],
+      "output": "volume_z_scaled"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["volume_z_scaled"],
+      "output": "volume_z_bounded"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume_z_bounded", "zscore_clip_cap_scalar"],
+      "output": "volume_z_clipped"
+    },
+    {
+      "name": "Min",
+      "param": ["lookback_period"],
+      "input": ["low"],
+      "output": "range_low"
+    },
+    {
+      "name": "Max",
+      "param": ["lookback_period"],
+      "input": ["high"],
+      "output": "range_high"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["range_high", "range_low"],
+      "output": "range_width"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "range_low"],
+      "output": "price_above_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["price_above_low", "range_width"],
+      "output": "range_position"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["unity", "range_position"],
+      "output": "range_reversal_weight"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["vwap_discount_signal", "volume_z_clipped"],
+      "output": "vwap_volume_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["vwap_volume_signal", "range_reversal_weight"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_period": 20,
+      "zscore_clip_cap": 3
+    },
+    {
+      "lookback_period": 10,
+      "zscore_clip_cap": 3
+    },
+    {
+      "lookback_period": 60,
+      "zscore_clip_cap": 4
+    }
+  ]
+}

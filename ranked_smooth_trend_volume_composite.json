@@ -1,0 +1,37 @@
+{
+  "formula": [
+    {"name": "Pct", "param": ["return_lag_period"], "input": ["close"], "output": "daily_return"},
+    {"name": "Sub", "param": [], "input": ["close", "close"], "output": "zero_level"},
+    {"name": "Greater", "param": [], "input": ["daily_return", "zero_level"], "output": "up_day_flag"},
+    {"name": "Less", "param": [], "input": ["daily_return", "zero_level"], "output": "down_day_flag"},
+    {"name": "Ma", "param": ["trend_window"], "input": ["up_day_flag"], "output": "positive_day_fraction"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "price_range"},
+    {"name": "Ma", "param": ["trend_window"], "input": ["price_range"], "output": "average_range"},
+    {"name": "Diff", "param": ["trend_window"], "input": ["close"], "output": "net_price_move"},
+    {"name": "Div", "param": [], "input": ["net_price_move", "average_range"], "output": "normalized_trend_move"},
+    {"name": "Mul", "param": [], "input": ["positive_day_fraction", "normalized_trend_move"], "output": "path_quality"},
+    {"name": "Std", "param": ["vol_short_window"], "input": ["daily_return"], "output": "short_horizon_volatility"},
+    {"name": "Std", "param": ["trend_window"], "input": ["daily_return"], "output": "long_horizon_volatility"},
+    {"name": "Div", "param": [], "input": ["short_horizon_volatility", "long_horizon_volatility"], "output": "volatility_compression"},
+    {"name": "Mul", "param": [], "input": ["path_quality", "volatility_compression"], "output": "path_vol_composite"},
+    {"name": "Rank", "param": ["trend_window"], "input": ["path_vol_composite"], "output": "ranked_path_vol_leg"},
+    {"name": "Mul", "param": [], "input": ["volume", "up_day_flag"], "output": "up_day_volume"},
+    {"name": "Mul", "param": [], "input": ["volume", "down_day_flag"], "output": "down_day_volume"},
+    {"name": "Sum", "param": ["trend_window"], "input": ["up_day_volume"], "output": "total_up_volume"},
+    {"name": "Sum", "param": ["trend_window"], "input": ["down_day_volume"], "output": "total_down_volume"},
+    {"name": "Sub", "param": [], "input": ["total_up_volume", "total_down_volume"], "output": "volume_imbalance_numerator"},
+    {"name": "Add", "param": [], "input": ["total_up_volume", "total_down_volume"], "output": "volume_imbalance_denominator"},
+    {"name": "Div", "param": [], "input": ["volume_imbalance_numerator", "volume_imbalance_denominator"], "output": "volume_imbalance"},
+    {"name": "Div", "param": [], "input": ["net_price_move", "average_range"], "output": "trend_direction_ratio"},
+    {"name": "Tanh", "param": [], "input": ["trend_direction_ratio"], "output": "smooth_direction_weight"},
+    {"name": "Mul", "param": [], "input": ["volume_imbalance", "smooth_direction_weight"], "output": "volume_direction_composite"},
+    {"name": "Rank", "param": ["trend_window"], "input": ["volume_direction_composite"], "output": "ranked_volume_direction_leg"},
+    {"name": "Mul", "param": [], "input": ["ranked_path_vol_leg", "ranked_volume_direction_leg"], "output": "combined_alpha_raw"},
+    {"name": "Rank", "param": ["trend_window"], "input": ["combined_alpha_raw"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"return_lag_period": 1, "trend_window": 10, "vol_short_window": 5},
+    {"return_lag_period": 1, "trend_window": 20, "vol_short_window": 10},
+    {"return_lag_period": 1, "trend_window": 15, "vol_short_window": 5}
+  ]
+}

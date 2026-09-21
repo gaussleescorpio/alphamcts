@@ -1,0 +1,189 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "range_span"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_above_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_above_low", "range_span"],
+      "output": "clv"
+    },
+    {
+      "name": "Diff",
+      "param": ["trend_window"],
+      "input": ["clv"],
+      "output": "clv_trend"
+    },
+    {
+      "name": "Std",
+      "param": ["signal_window"],
+      "input": ["clv"],
+      "output": "clv_volatility"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["clv_trend", "clv_volatility"],
+      "output": "clv_momentum"
+    },
+    {
+      "name": "Corr",
+      "param": ["signal_window"],
+      "input": ["clv", "volume"],
+      "output": "price_volume_corr"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["clv_momentum"],
+      "output": "momentum_sign"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_volume_corr"],
+      "output": "corr_sign"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["momentum_sign", "corr_sign"],
+      "output": "sign_product"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["momentum_sign", "momentum_sign"],
+      "output": "zero_level"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["sign_product", "zero_level"],
+      "output": "sign_agreement"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["clv_momentum"],
+      "output": "momentum_abs"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["price_volume_corr"],
+      "output": "corr_abs"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["momentum_abs", "corr_abs"],
+      "output": "momentum_is_weaker"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["corr_abs", "momentum_abs"],
+      "output": "corr_is_weaker"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["momentum_abs", "corr_abs"],
+      "output": "magnitude_sum"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["magnitude_sum"],
+      "output": "one_level"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["momentum_is_weaker", "corr_is_weaker"],
+      "output": "strict_winner_count"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["one_level", "strict_winner_count"],
+      "output": "magnitude_equal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["momentum_abs", "momentum_is_weaker"],
+      "output": "momentum_capped_part"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["corr_abs", "corr_is_weaker"],
+      "output": "corr_capped_part"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["momentum_abs", "magnitude_equal"],
+      "output": "equal_capped_part"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["momentum_capped_part", "corr_capped_part"],
+      "output": "capped_magnitude_partial"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["capped_magnitude_partial", "equal_capped_part"],
+      "output": "capped_magnitude"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["capped_magnitude", "momentum_sign"],
+      "output": "directional_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["directional_signal", "sign_agreement"],
+      "output": "gated_signal"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["gated_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "trend_window": 5,
+      "signal_window": 20,
+      "rank_window": 60
+    },
+    {
+      "trend_window": 10,
+      "signal_window": 30,
+      "rank_window": 90
+    },
+    {
+      "trend_window": 3,
+      "signal_window": 15,
+      "rank_window": 45
+    }
+  ]
+}

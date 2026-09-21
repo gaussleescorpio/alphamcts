@@ -1,0 +1,135 @@
+{
+  "formula": [
+    {
+      "name": "Diff",
+      "param": ["diff_period"],
+      "input": ["close"],
+      "output": "price_change_1d"
+    },
+    {
+      "name": "Diff",
+      "param": ["diff_period"],
+      "input": ["volume"],
+      "output": "volume_change_1d"
+    },
+    {
+      "name": "Delay",
+      "param": ["volume_change_lag"],
+      "input": ["volume_change_1d"],
+      "output": "lagged_volume_change_1d"
+    },
+    {
+      "name": "Zscore",
+      "param": ["short_correlation_window"],
+      "input": ["price_change_1d"],
+      "output": "z_score_price_change"
+    },
+    {
+      "name": "Zscore",
+      "param": ["short_correlation_window"],
+      "input": ["lagged_volume_change_1d"],
+      "output": "z_score_lagged_volume_change"
+    },
+    {
+      "name": "Corr",
+      "param": ["short_correlation_window"],
+      "input": ["z_score_price_change", "z_score_lagged_volume_change"],
+      "output": "short_horizon_price_volume_corr"
+    },
+    {
+      "name": "Corr",
+      "param": ["long_correlation_window"],
+      "input": ["z_score_price_change", "z_score_lagged_volume_change"],
+      "output": "long_horizon_price_volume_corr"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_lookback"],
+      "input": ["short_horizon_price_volume_corr"],
+      "output": "ranked_short_horizon_corr"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_lookback"],
+      "input": ["long_horizon_price_volume_corr"],
+      "output": "ranked_long_horizon_corr"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["ranked_short_horizon_corr", "ranked_long_horizon_corr"],
+      "output": "sum_ranked_correlations"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_lookback"],
+      "input": ["sum_ranked_correlations"],
+      "output": "blended_abnormal_comovement"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["z_score_price_change"],
+      "output": "filtered_price_direction"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["price_change_1d"],
+      "output": "abs_price_change_1d"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_lookback"],
+      "input": ["abs_price_change_1d"],
+      "output": "relative_move_magnitude"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["filtered_price_direction", "relative_move_magnitude"],
+      "output": "directional_pressure_leg"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["blended_abnormal_comovement", "directional_pressure_leg"],
+      "output": "raw_composite_score"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_correlation_window"],
+      "input": ["raw_composite_score"],
+      "output": "smoothed_composite_score"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_lookback"],
+      "input": ["smoothed_composite_score"],
+      "output": "final_alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "diff_period": 1,
+      "volume_change_lag": 1,
+      "short_correlation_window": 10,
+      "long_correlation_window": 40,
+      "rank_lookback": 60
+    },
+    {
+      "diff_period": 1,
+      "volume_change_lag": 1,
+      "short_correlation_window": 20,
+      "long_correlation_window": 60,
+      "rank_lookback": 90
+    },
+    {
+      "diff_period": 1,
+      "volume_change_lag": 1,
+      "short_correlation_window": 15,
+      "long_correlation_window": 50,
+      "rank_lookback": 120
+    }
+  ]
+}

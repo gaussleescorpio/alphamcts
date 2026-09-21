@@ -1,0 +1,113 @@
+{
+  "name": "aligned_regime_efficiency_rank",
+  "description": "Ranks stocks by how efficiently their recent daily price moves use the full trading range, but only when that move aligns with medium-term trend direction and price–volume co-movement.",
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "price_body"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["price_body", "daily_range"],
+      "output": "body_efficiency"
+    },
+    {
+      "name": "Ma",
+      "param": ["efficiency_window"],
+      "input": ["body_efficiency"],
+      "output": "smoothed_efficiency"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_body"],
+      "output": "efficiency_direction"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["smoothed_efficiency", "efficiency_direction"],
+      "output": "signed_efficiency"
+    },
+    {
+      "name": "Diff",
+      "param": ["change_lag"],
+      "input": ["close"],
+      "output": "close_change"
+    },
+    {
+      "name": "Diff",
+      "param": ["change_lag"],
+      "input": ["volume"],
+      "output": "volume_change"
+    },
+    {
+      "name": "Corr",
+      "param": ["correlation_window"],
+      "input": ["close_change", "volume_change"],
+      "output": "price_volume_correlation"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_volume_correlation"],
+      "output": "volume_alignment"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["signed_efficiency", "volume_alignment"],
+      "output": "aligned_efficiency"
+    },
+    {
+      "name": "Diff",
+      "param": ["correlation_window"],
+      "input": ["vwap"],
+      "output": "vwap_momentum"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["vwap_momentum"],
+      "output": "trend_direction"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["aligned_efficiency", "trend_direction"],
+      "output": "regime_efficiency"
+    },
+    {
+      "name": "Rank",
+      "param": ["efficiency_window"],
+      "input": ["regime_efficiency"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "efficiency_window": 5,
+      "correlation_window": 10,
+      "change_lag": 1
+    },
+    {
+      "efficiency_window": 10,
+      "correlation_window": 20,
+      "change_lag": 1
+    },
+    {
+      "efficiency_window": 20,
+      "correlation_window": 40,
+      "change_lag": 1
+    }
+  ]
+}

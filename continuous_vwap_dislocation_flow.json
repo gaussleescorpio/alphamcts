@@ -1,0 +1,31 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "vwap_gap"},
+    {"name": "Div", "param": [], "input": ["vwap_gap", "vwap"], "output": "relative_dislocation"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["relative_dislocation"], "output": "dislocation_rank"},
+    {"name": "Med", "param": ["rank_window"], "input": ["volume"], "output": "median_volume"},
+    {"name": "Div", "param": [], "input": ["volume", "median_volume"], "output": "volume_participation_ratio"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["volume_participation_ratio"], "output": "participation_when_rich"},
+    {"name": "Div", "param": [], "input": ["median_volume", "volume"], "output": "inverse_participation_ratio"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["inverse_participation_ratio"], "output": "participation_when_cheap"},
+    {"name": "Greater", "param": [], "input": ["close", "vwap"], "output": "above_vwap_indicator"},
+    {"name": "Less", "param": [], "input": ["close", "vwap"], "output": "below_vwap_indicator"},
+    {"name": "Mul", "param": [], "input": ["above_vwap_indicator", "participation_when_rich"], "output": "participation_above_vwap"},
+    {"name": "Mul", "param": [], "input": ["below_vwap_indicator", "participation_when_cheap"], "output": "participation_below_vwap"},
+    {"name": "Add", "param": [], "input": ["participation_above_vwap", "participation_below_vwap"], "output": "participation_weight"},
+    {"name": "Diff", "param": [], "input": ["close"], "output": "daily_price_change"},
+    {"name": "Sign", "param": [], "input": ["daily_price_change"], "output": "price_direction"},
+    {"name": "Mul", "param": [], "input": ["volume", "price_direction"], "output": "directional_volume"},
+    {"name": "Sum", "param": ["flow_lookback"], "input": ["directional_volume"], "output": "cumulative_directional_flow"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["cumulative_directional_flow"], "output": "directional_flow_rank"},
+    {"name": "Sign", "param": [], "input": ["vwap_gap"], "output": "dislocation_sign"},
+    {"name": "Mul", "param": [], "input": ["dislocation_sign", "directional_flow_rank"], "output": "aligned_flow_confirmation"},
+    {"name": "Mul", "param": [], "input": ["dislocation_rank", "participation_weight"], "output": "dislocation_with_participation"},
+    {"name": "Mul", "param": [], "input": ["dislocation_with_participation", "aligned_flow_confirmation"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"rank_window": 20, "flow_lookback": 10},
+    {"rank_window": 40, "flow_lookback": 20},
+    {"rank_window": 60, "flow_lookback": 30}
+  ]
+}

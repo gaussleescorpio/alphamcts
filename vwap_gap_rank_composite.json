@@ -1,0 +1,141 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_minus_low"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "range_span"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_minus_low", "range_span"],
+      "output": "close_position"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["vwap", "low"],
+      "output": "vwap_minus_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["vwap_minus_low", "range_span"],
+      "output": "vwap_position"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close_position", "vwap_position"],
+      "output": "intraday_gap"
+    },
+    {
+      "name": "Ma",
+      "param": ["gap_smooth_window"],
+      "input": ["intraday_gap"],
+      "output": "gap_level_smooth"
+    },
+    {
+      "name": "Ma",
+      "param": ["gap_change_slow_window"],
+      "input": ["intraday_gap"],
+      "output": "gap_level_slow"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["gap_level_smooth", "gap_level_slow"],
+      "output": "gap_change"
+    },
+    {
+      "name": "Rank",
+      "param": [],
+      "input": ["gap_level_smooth"],
+      "output": "rank_gap_level"
+    },
+    {
+      "name": "Rank",
+      "param": [],
+      "input": ["gap_change"],
+      "output": "rank_gap_change"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["rank_gap_level", "rank_gap_change"],
+      "output": "rank_gap_blend"
+    },
+    {
+      "name": "Diff",
+      "param": ["gap_smooth_window"],
+      "input": ["vwap"],
+      "output": "vwap_change"
+    },
+    {
+      "name": "Diff",
+      "param": ["gap_smooth_window"],
+      "input": ["volume"],
+      "output": "volume_change"
+    },
+    {
+      "name": "Corr",
+      "param": ["correlation_window"],
+      "input": ["vwap_change", "volume_change"],
+      "output": "volume_price_corr"
+    },
+    {
+      "name": "Rank",
+      "param": [],
+      "input": ["volume_price_corr"],
+      "output": "rank_corr"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["range_span", "vwap"],
+      "output": "range_ratio"
+    },
+    {
+      "name": "Rank",
+      "param": [],
+      "input": ["range_ratio"],
+      "output": "rank_range"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["rank_gap_blend", "rank_corr"],
+      "output": "alpha_raw"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["alpha_raw", "rank_range"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "gap_smooth_window": 5,
+      "gap_change_slow_window": 20,
+      "correlation_window": 10
+    },
+    {
+      "gap_smooth_window": 10,
+      "gap_change_slow_window": 40,
+      "correlation_window": 20
+    },
+    {
+      "gap_smooth_window": 3,
+      "gap_change_slow_window": 15,
+      "correlation_window": 5
+    }
+  ]
+}

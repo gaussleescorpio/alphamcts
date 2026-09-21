@@ -1,0 +1,171 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "price_gap"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["price_gap"],
+      "output": "body_move"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Ma",
+      "param": ["efficiency_window"],
+      "input": ["daily_range"],
+      "output": "smoothed_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["daily_range", "smoothed_range"],
+      "output": "range_diff"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["range_diff"],
+      "output": "abs_range_diff"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["daily_range", "smoothed_range"],
+      "output": "range_sum"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["range_sum", "abs_range_diff"],
+      "output": "range_max_numerator"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["close"],
+      "output": "neg_close"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["close", "neg_close"],
+      "output": "unit_flag"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["unit_flag", "unit_flag"],
+      "output": "pair_divisor"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["range_max_numerator", "pair_divisor"],
+      "output": "stabilized_range"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["body_move", "stabilized_range"],
+      "output": "raw_efficiency"
+    },
+    {
+      "name": "Ma",
+      "param": ["efficiency_window"],
+      "input": ["raw_efficiency"],
+      "output": "avg_efficiency"
+    },
+    {
+      "name": "Diff",
+      "param": ["momentum_window"],
+      "input": ["close"],
+      "output": "close_change"
+    },
+    {
+      "name": "Std",
+      "param": ["momentum_window"],
+      "input": ["close_change"],
+      "output": "change_volatility"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_change", "change_volatility"],
+      "output": "normalized_momentum"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["avg_efficiency"],
+      "output": "ranked_efficiency"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["normalized_momentum"],
+      "output": "ranked_momentum"
+    },
+    {
+      "name": "Diff",
+      "param": ["efficiency_window"],
+      "input": ["close"],
+      "output": "short_change"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["short_change"],
+      "output": "short_direction"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["close_change"],
+      "output": "medium_direction"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["short_direction", "medium_direction"],
+      "output": "momentum_agreement"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["ranked_efficiency", "ranked_momentum"],
+      "output": "core_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["core_signal", "momentum_agreement"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "efficiency_window": 5,
+      "momentum_window": 10,
+      "rank_window": 20
+    },
+    {
+      "efficiency_window": 10,
+      "momentum_window": 20,
+      "rank_window": 60
+    },
+    {
+      "efficiency_window": 20,
+      "momentum_window": 40,
+      "rank_window": 120
+    }
+  ]
+}

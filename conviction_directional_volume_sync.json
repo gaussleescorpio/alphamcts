@@ -1,0 +1,81 @@
+{
+  "formula": [
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["close"],
+      "output": "price_log"
+    },
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["volume"],
+      "output": "volume_log"
+    },
+    {
+      "name": "Diff",
+      "param": ["return_lag"],
+      "input": ["price_log"],
+      "output": "price_return"
+    },
+    {
+      "name": "Diff",
+      "param": ["return_lag"],
+      "input": ["volume_log"],
+      "output": "volume_return"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["price_return"],
+      "output": "price_return_sign"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["price_return"],
+      "output": "price_return_magnitude"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["price_return_sign", "price_return_magnitude"],
+      "output": "weighted_price_move"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["volume_return"],
+      "output": "signed_volume_move"
+    },
+    {
+      "name": "Corr",
+      "param": ["correlation_window"],
+      "input": ["weighted_price_move", "signed_volume_move"],
+      "output": "co_movement"
+    },
+    {
+      "name": "Zscore",
+      "param": ["zscore_window"],
+      "input": ["co_movement"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "return_lag": 1,
+      "correlation_window": 20,
+      "zscore_window": 60
+    },
+    {
+      "return_lag": 1,
+      "correlation_window": 40,
+      "zscore_window": 60
+    },
+    {
+      "return_lag": 5,
+      "correlation_window": 60,
+      "zscore_window": 120
+    }
+  ]
+}

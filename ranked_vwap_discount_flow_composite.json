@@ -1,0 +1,26 @@
+{
+  "formula": [
+    {"name": "Ma", "param": ["anchor_period"], "input": ["vwap"], "output": "vwap_anchor"},
+    {"name": "Sub", "param": [], "input": ["vwap_anchor", "vwap"], "output": "vwap_discount"},
+    {"name": "Div", "param": [], "input": ["vwap_discount", "vwap_anchor"], "output": "normalized_vwap_discount"},
+    {"name": "Ma", "param": ["anchor_period"], "input": ["normalized_vwap_discount"], "output": "smoothed_vwap_discount"},
+    {"name": "Rank", "param": ["drift_rank_window"], "input": ["smoothed_vwap_discount"], "output": "vwap_discount_rank"},
+    {"name": "Corr", "param": ["flow_window"], "input": ["close", "volume"], "output": "close_volume_correlation"},
+    {"name": "Rank", "param": ["flow_window"], "input": ["close_volume_correlation"], "output": "flow_alignment_rank"},
+    {"name": "Ma", "param": ["anchor_period"], "input": ["volume"], "output": "short_term_volume"},
+    {"name": "Ma", "param": ["flow_window"], "input": ["volume"], "output": "long_term_volume"},
+    {"name": "Div", "param": [], "input": ["short_term_volume", "long_term_volume"], "output": "volume_participation_ratio"},
+    {"name": "Rank", "param": ["flow_window"], "input": ["volume_participation_ratio"], "output": "volume_participation_rank"},
+    {"name": "Add", "param": [], "input": ["flow_alignment_rank", "volume_participation_rank"], "output": "flow_and_volume_ranks"},
+    {"name": "Add", "param": [], "input": ["vwap_discount_rank", "flow_and_volume_ranks"], "output": "rank_composite_sum"},
+    {"name": "Greater", "param": [], "input": ["high", "low"], "output": "bar_range_unit"},
+    {"name": "Add", "param": [], "input": ["bar_range_unit", "bar_range_unit"], "output": "two_leg_units"},
+    {"name": "Add", "param": [], "input": ["bar_range_unit", "two_leg_units"], "output": "leg_count_divisor"},
+    {"name": "Div", "param": [], "input": ["rank_composite_sum", "leg_count_divisor"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"anchor_period": 10, "drift_rank_window": 20, "flow_window": 20},
+    {"anchor_period": 15, "drift_rank_window": 60, "flow_window": 40},
+    {"anchor_period": 20, "drift_rank_window": 120, "flow_window": 60}
+  ]
+}

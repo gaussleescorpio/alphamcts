@@ -1,0 +1,108 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "price_vwap_gap"
+    },
+    {
+      "name": "Zscore",
+      "param": ["short_lookback"],
+      "input": ["price_vwap_gap"],
+      "output": "zscore_short"
+    },
+    {
+      "name": "Zscore",
+      "param": ["long_lookback"],
+      "input": ["price_vwap_gap"],
+      "output": "zscore_long"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["zscore_short"],
+      "output": "sign_short"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["zscore_long"],
+      "output": "sign_long"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["sign_short", "sign_long"],
+      "output": "sign_consensus"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["zscore_short"],
+      "output": "abs_zscore_short"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["zscore_long"],
+      "output": "abs_zscore_long"
+    },
+    {
+      "name": "Min",
+      "param": [],
+      "input": ["abs_zscore_short", "abs_zscore_long"],
+      "output": "consensus_magnitude"
+    },
+    {
+      "name": "Rank",
+      "param": ["volume_rank_window"],
+      "input": ["volume"],
+      "output": "volume_rank"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["sign_consensus", "consensus_magnitude"],
+      "output": "dislocation_conviction"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["dislocation_conviction", "volume_rank"],
+      "output": "raw_composite"
+    },
+    {
+      "name": "Ma",
+      "param": ["signal_smoothing_window"],
+      "input": ["raw_composite"],
+      "output": "smoothed_composite"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["smoothed_composite"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "short_lookback": 10,
+      "long_lookback": 40,
+      "volume_rank_window": 20,
+      "signal_smoothing_window": 5
+    },
+    {
+      "short_lookback": 15,
+      "long_lookback": 60,
+      "volume_rank_window": 40,
+      "signal_smoothing_window": 10
+    },
+    {
+      "short_lookback": 20,
+      "long_lookback": 80,
+      "volume_rank_window": 60,
+      "signal_smoothing_window": 15
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["open", "close"], "output": "open_close_spread"},
+    {"name": "Greater", "param": [], "input": ["open", "close"], "output": "is_bearish_candle"},
+    {"name": "Mul", "param": [], "input": ["open_close_spread", "is_bearish_candle"], "output": "bearish_body_adjustment"},
+    {"name": "Sub", "param": [], "input": ["open", "bearish_body_adjustment"], "output": "effective_body_bottom"},
+    {"name": "Add", "param": [], "input": ["close", "bearish_body_adjustment"], "output": "effective_body_top"},
+    {"name": "Sub", "param": [], "input": ["effective_body_bottom", "low"], "output": "lower_wick_length"},
+    {"name": "Sub", "param": [], "input": ["high", "effective_body_top"], "output": "upper_wick_length"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "candle_range"},
+    {"name": "Sub", "param": [], "input": ["lower_wick_length", "upper_wick_length"], "output": "wick_length_spread"},
+    {"name": "Div", "param": [], "input": ["wick_length_spread", "candle_range"], "output": "wick_asymmetry"},
+    {"name": "Greater", "param": [], "input": ["high", "low"], "output": "high_gt_low"},
+    {"name": "Ma", "param": ["confirmation_window"], "input": ["volume"], "output": "volume_baseline"},
+    {"name": "Div", "param": [], "input": ["volume", "volume_baseline"], "output": "volume_ratio"},
+    {"name": "Diff", "param": ["confirmation_window"], "input": ["volume_ratio"], "output": "volume_momentum"},
+    {"name": "Abs", "param": [], "input": ["volume_momentum"], "output": "abs_volume_momentum"},
+    {"name": "Neg", "param": [], "input": ["abs_volume_momentum"], "output": "zero_reference"},
+    {"name": "Greater", "param": [], "input": ["volume_momentum", "zero_reference"], "output": "momentum_is_positive"},
+    {"name": "Med", "param": ["confirmation_window"], "input": ["volume_ratio"], "output": "volume_ratio_median"},
+    {"name": "Greater", "param": [], "input": ["volume_ratio", "volume_ratio_median"], "output": "volume_is_elevated"},
+    {"name": "Mul", "param": [], "input": ["momentum_is_positive", "volume_is_elevated"], "output": "daily_volume_confirmed"},
+    {"name": "Sum", "param": ["confirmation_window"], "input": ["daily_volume_confirmed"], "output": "confirmation_count"},
+    {"name": "Sum", "param": ["confirmation_window"], "input": ["high_gt_low"], "output": "confirmation_window_units"},
+    {"name": "Sub", "param": [], "input": ["confirmation_window_units", "high_gt_low"], "output": "minimum_persistence_threshold"},
+    {"name": "Greater", "param": [], "input": ["confirmation_count", "minimum_persistence_threshold"], "output": "volume_persistently_confirmed"},
+    {"name": "Delay", "param": ["lag_period"], "input": ["wick_asymmetry"], "output": "prior_wick_asymmetry"},
+    {"name": "Sum", "param": ["normalization_window"], "input": ["high_gt_low"], "output": "normalization_window_units"},
+    {"name": "Sub", "param": [], "input": ["normalization_window_units", "confirmation_window_units"], "output": "decay_numerator"},
+    {"name": "Div", "param": [], "input": ["decay_numerator", "normalization_window_units"], "output": "accumulation_decay"},
+    {"name": "Mul", "param": [], "input": ["prior_wick_asymmetry", "accumulation_decay"], "output": "decayed_prior_accumulation"},
+    {"name": "Sub", "param": [], "input": ["high_gt_low", "volume_persistently_confirmed"], "output": "unconfirmed_mask"},
+    {"name": "Mul", "param": [], "input": ["wick_asymmetry", "volume_persistently_confirmed"], "output": "confirmed_contribution"},
+    {"name": "Mul", "param": [], "input": ["unconfirmed_mask", "decayed_prior_accumulation"], "output": "decayed_contribution"},
+    {"name": "Add", "param": [], "input": ["confirmed_contribution", "decayed_contribution"], "output": "daily_accumulation"},
+    {"name": "Ma", "param": ["normalization_window"], "input": ["daily_accumulation"], "output": "smoothed_accumulation"},
+    {"name": "Rank", "param": ["normalization_window"], "input": ["smoothed_accumulation"], "output": "ranked_accumulation"},
+    {"name": "Div", "param": [], "input": ["candle_range", "close"], "output": "normalized_candle_range"},
+    {"name": "Std", "param": ["normalization_window"], "input": ["normalized_candle_range"], "output": "range_volatility"},
+    {"name": "Div", "param": [], "input": ["ranked_accumulation", "range_volatility"], "output": "alpha"}
+  ],
+  "arguments": [
+    {
+      "confirmation_window": 5,
+      "normalization_window": 20,
+      "lag_period": 1
+    },
+    {
+      "confirmation_window": 10,
+      "normalization_window": 40,
+      "lag_period": 1
+    },
+    {
+      "confirmation_window": 20,
+      "normalization_window": 60,
+      "lag_period": 1
+    }
+  ]
+}

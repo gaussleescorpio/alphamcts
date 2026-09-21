@@ -1,0 +1,43 @@
+{
+  "formula": [
+    {"name": "Add", "param": [], "input": ["close", "close"], "output": "close_times_two"},
+    {"name": "Add", "param": [], "input": ["high", "low"], "output": "hl_sum"},
+    {"name": "Sub", "param": [], "input": ["close_times_two", "hl_sum"], "output": "clv_numerator"},
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Div", "param": [], "input": ["close", "close"], "output": "unit_one"},
+    {"name": "Add", "param": [], "input": ["daily_range", "unit_one"], "output": "range_denominator"},
+    {"name": "Div", "param": [], "input": ["clv_numerator", "range_denominator"], "output": "close_location_value"},
+    {"name": "Sum", "param": ["accumulation_window"], "input": ["close_location_value"], "output": "accumulated_clv"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["accumulated_clv"], "output": "signed_efficiency"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["accumulated_clv"], "output": "ranked_accumulated_clv"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["ranked_accumulated_clv"], "output": "ranked_efficiency"},
+    {"name": "Diff", "param": [], "input": ["close"], "output": "daily_return"},
+    {"name": "Sign", "param": [], "input": ["daily_return"], "output": "daily_return_sign"},
+    {"name": "Mul", "param": [], "input": ["daily_return_sign", "volume"], "output": "signed_volume"},
+    {"name": "Sum", "param": ["accumulation_window"], "input": ["signed_volume"], "output": "net_signed_volume"},
+    {"name": "Sum", "param": ["accumulation_window"], "input": ["volume"], "output": "total_volume"},
+    {"name": "Div", "param": [], "input": ["net_signed_volume", "total_volume"], "output": "volume_imbalance_ratio"},
+    {"name": "Rank", "param": ["rank_window"], "input": ["volume_imbalance_ratio"], "output": "ranked_volume_imbalance"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["ranked_volume_imbalance"], "output": "smoothed_volume_imbalance"},
+    {"name": "Sign", "param": [], "input": ["signed_efficiency"], "output": "efficiency_sign"},
+    {"name": "Sign", "param": [], "input": ["smoothed_volume_imbalance"], "output": "volume_sign"},
+    {"name": "Mul", "param": [], "input": ["efficiency_sign", "volume_sign"], "output": "sign_product"},
+    {"name": "Neg", "param": [], "input": ["sign_product"], "output": "neg_sign_product"},
+    {"name": "Greater", "param": [], "input": ["sign_product", "neg_sign_product"], "output": "sign_match_gate"},
+    {"name": "Sub", "param": [], "input": ["smoothed_volume_imbalance", "unit_one"], "output": "imbalance_offset"},
+    {"name": "Mul", "param": [], "input": ["sign_match_gate", "imbalance_offset"], "output": "gate_weight"},
+    {"name": "Add", "param": [], "input": ["unit_one", "gate_weight"], "output": "volume_multiplier"},
+    {"name": "Mul", "param": [], "input": ["ranked_efficiency", "volume_multiplier"], "output": "confirmed_signal"},
+    {"name": "Abs", "param": [], "input": ["daily_return"], "output": "daily_close_move"},
+    {"name": "Add", "param": [], "input": ["daily_close_move", "unit_one"], "output": "move_denominator"},
+    {"name": "Div", "param": [], "input": ["daily_range", "move_denominator"], "output": "range_per_move"},
+    {"name": "Std", "param": ["accumulation_window"], "input": ["range_per_move"], "output": "range_per_move_std"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["range_per_move_std"], "output": "path_noise"},
+    {"name": "Div", "param": [], "input": ["confirmed_signal", "path_noise"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"accumulation_window": 10, "smoothing_window": 5, "rank_window": 20},
+    {"accumulation_window": 15, "smoothing_window": 5, "rank_window": 30},
+    {"accumulation_window": 20, "smoothing_window": 10, "rank_window": 60}
+  ]
+}

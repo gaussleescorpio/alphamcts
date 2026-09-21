@@ -1,0 +1,30 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Ma", "param": ["range_window"], "input": ["daily_range"], "output": "typical_range"},
+    {"name": "Div", "param": [], "input": ["daily_range", "typical_range"], "output": "abnormal_range"},
+    {"name": "Corr", "param": ["correlation_window"], "input": ["abnormal_range", "volume"], "output": "range_volume_corr"},
+    {"name": "Abs", "param": [], "input": ["range_volume_corr"], "output": "abs_range_volume_corr"},
+    {"name": "Diff", "param": ["correlation_window"], "input": ["close"], "output": "close_momentum"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["close_momentum"], "output": "smoothed_drift"},
+    {"name": "Div", "param": [], "input": ["daily_range", "close"], "output": "close_range_ratio"},
+    {"name": "Ma", "param": ["range_window"], "input": ["close_range_ratio"], "output": "volatility_scale"},
+    {"name": "Div", "param": [], "input": ["smoothed_drift", "volatility_scale"], "output": "normalized_drift"},
+    {"name": "Ma", "param": ["correlation_window"], "input": ["volume"], "output": "smoothed_volume"},
+    {"name": "Rank", "param": [], "input": ["range_volume_corr"], "output": "rank_range_volume_corr"},
+    {"name": "Rank", "param": [], "input": ["normalized_drift"], "output": "rank_normalized_drift"},
+    {"name": "Rank", "param": [], "input": ["abs_range_volume_corr"], "output": "rank_abs_range_volume_corr"},
+    {"name": "Rank", "param": [], "input": ["smoothed_volume"], "output": "rank_smoothed_volume"},
+    {"name": "Mul", "param": [], "input": ["rank_range_volume_corr", "rank_normalized_drift"], "output": "drift_corr_product"},
+    {"name": "Mul", "param": [], "input": ["drift_corr_product", "rank_abs_range_volume_corr"], "output": "corr_volume_product"},
+    {"name": "Mul", "param": [], "input": ["corr_volume_product", "rank_smoothed_volume"], "output": "conflict_core"},
+    {"name": "Neg", "param": [], "input": ["conflict_core"], "output": "negated_conflict"},
+    {"name": "Ma", "param": ["smoothing_window"], "input": ["negated_conflict"], "output": "smoothed_conflict"},
+    {"name": "Rank", "param": [], "input": ["smoothed_conflict"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"range_window": 20, "correlation_window": 20, "smoothing_window": 5},
+    {"range_window": 10, "correlation_window": 15, "smoothing_window": 3},
+    {"range_window": 40, "correlation_window": 30, "smoothing_window": 8}
+  ]
+}

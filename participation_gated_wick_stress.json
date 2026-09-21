@@ -1,0 +1,339 @@
+{
+  "formula": [
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["open", "close"],
+      "output": "open_below_close"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["open", "close"],
+      "output": "open_minus_close"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["open_below_close", "open_minus_close"],
+      "output": "body_top_adjustment"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["open", "body_top_adjustment"],
+      "output": "body_top"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "close_below_open"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "close_minus_open"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["close_below_open", "close_minus_open"],
+      "output": "body_bottom_adjustment"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["open", "body_bottom_adjustment"],
+      "output": "body_bottom"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "body_top"],
+      "output": "upper_wick"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["body_bottom", "low"],
+      "output": "lower_wick"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_window"],
+      "input": ["volume"],
+      "output": "volume_ma"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume", "volume_ma"],
+      "output": "volume_ratio"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_window"],
+      "input": ["upper_wick"],
+      "output": "upper_wick_ma"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["upper_wick", "upper_wick_ma"],
+      "output": "upper_wick_normalized"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["upper_wick_normalized", "volume_ratio"],
+      "output": "normalized_upper_leg"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_window"],
+      "input": ["lower_wick"],
+      "output": "lower_wick_ma"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["lower_wick", "lower_wick_ma"],
+      "output": "lower_wick_normalized"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["lower_wick_normalized", "volume_ratio"],
+      "output": "normalized_lower_leg"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["normalized_upper_leg"],
+      "output": "rank_upside_leg"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["normalized_lower_leg"],
+      "output": "rank_downside_leg"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["rank_upside_leg", "rank_downside_leg"],
+      "output": "wick_imbalance"
+    },
+    {
+      "name": "Std",
+      "param": ["short_window"],
+      "input": ["wick_imbalance"],
+      "output": "imbalance_volatility"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["wick_imbalance", "imbalance_volatility"],
+      "output": "volatility_adjusted_imbalance"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_window"],
+      "input": ["daily_range"],
+      "output": "daily_range_ma"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["daily_range", "daily_range_ma"],
+      "output": "normalized_range"
+    },
+    {
+      "name": "Corr",
+      "param": ["short_window"],
+      "input": ["normalized_range", "volume_ratio"],
+      "output": "corr_short"
+    },
+    {
+      "name": "Corr",
+      "param": ["rank_window"],
+      "input": ["normalized_range", "volume_ratio"],
+      "output": "corr_long"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["volume", "volume"],
+      "output": "zero_reference"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["wick_imbalance", "zero_reference"],
+      "output": "positive_imbalance_flag"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["wick_imbalance", "zero_reference"],
+      "output": "negative_imbalance_flag"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["corr_long", "zero_reference"],
+      "output": "positive_corr_long_flag"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["positive_corr_long_flag", "corr_long"],
+      "output": "max_corr_long_nonneg"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["corr_short", "zero_reference"],
+      "output": "negative_corr_short_flag"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["negative_corr_short_flag", "corr_short"],
+      "output": "min_corr_short_nonpositive"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["corr_short", "max_corr_long_nonneg"],
+      "output": "stress_when_positive"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["min_corr_short_nonpositive", "corr_long"],
+      "output": "stress_when_negative"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["positive_imbalance_flag", "stress_when_positive"],
+      "output": "positive_stress_component"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["negative_imbalance_flag", "stress_when_negative"],
+      "output": "negative_stress_component"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["positive_stress_component", "negative_stress_component"],
+      "output": "asymmetric_stress"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volatility_adjusted_imbalance", "asymmetric_stress"],
+      "output": "core_signal"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume", "volume_ma"],
+      "output": "participation_intensity"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_window"],
+      "input": ["participation_intensity"],
+      "output": "smoothed_participation"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["smoothed_participation"],
+      "output": "participation_rank"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["core_signal", "participation_rank"],
+      "output": "gated_signal"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_window"],
+      "input": ["gated_signal"],
+      "output": "smoothed_signal"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["volume_ma", "volume_ma"],
+      "output": "unity"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["smoothed_signal"],
+      "output": "abs_smoothed_signal"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["unity", "abs_smoothed_signal"],
+      "output": "one_plus_abs"
+    },
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["one_plus_abs"],
+      "output": "log_magnitude"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["smoothed_signal"],
+      "output": "smoothed_signal_sign"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["smoothed_signal_sign", "log_magnitude"],
+      "output": "compressed_signal"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["compressed_signal"],
+      "output": "final_alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_window": 20,
+      "rank_window": 60,
+      "short_window": 10
+    },
+    {
+      "lookback_window": 40,
+      "rank_window": 120,
+      "short_window": 20
+    },
+    {
+      "lookback_window": 10,
+      "rank_window": 40,
+      "short_window": 5
+    }
+  ]
+}

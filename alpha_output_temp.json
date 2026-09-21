@@ -1,0 +1,18 @@
+{
+  "name": "vwap_acceptance_improvement_rank",
+  "description": "When price closes below VWAP within the day's trading range, that often marks short-term overshoot rather than strength. This alpha tracks whether that gap is widening versus each stock's recent norm—favoring names where close is reclaiming fair value—and scales by typical spread volatility, then ranks the result over time for a stable, unitless score.",
+  "pseudo_code": [
+    "range_width = Sub(input=[high, low], param=[])",
+    "close_minus_low = Sub(input=[close, low], param=[])",
+    "close_range_position = Div(input=[close_minus_low, range_width], param=[])",
+    "vwap_minus_low = Sub(input=[vwap, low], param=[])",
+    "vwap_range_position = Div(input=[vwap_minus_low, range_width], param=[])",
+    "reversal_spread = Sub(input=[vwap_range_position, close_range_position], param=[])",
+    "short_smoothed_spread = Ma(input=[reversal_spread], param=[short_smooth_window])",
+    "baseline_smoothed_spread = Ma(input=[reversal_spread], param=[baseline_window])",
+    "spread_improvement = Sub(input=[short_smoothed_spread, baseline_smoothed_spread], param=[])",
+    "spread_volatility = Std(input=[reversal_spread], param=[normalization_window])",
+    "scaled_signal = Div(input=[spread_improvement, spread_volatility], param=[])",
+    "alpha = Rank(input=[scaled_signal], param=[normalization_window])"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "signed_range_migration_flow_alignment",
+  "description": "Scores stocks where recent movement within the daily trading range is strong relative to its own volatility and is confirmed by coordinated direction in abnormal volume. Range migration and volume participation must both be aligned in direction; the factor favors names that rank highly on both legs together rather than on either leg alone.",
+  "pseudo_code": [
+    "close_minus_low = Sub(input=[close, low], param=[])",
+    "high_minus_low = Sub(input=[high, low], param=[])",
+    "range_position = Div(input=[close_minus_low, high_minus_low], param=[])",
+    "range_change_short = Diff(input=[range_position], param=[migration_lag])",
+    "range_change_base = Diff(input=[range_position], param=[flow_window])",
+    "range_change_volatility = Std(input=[range_change_base], param=[flow_window])",
+    "migration_leg_raw = Div(input=[range_change_short, range_change_volatility], param=[])",
+    "volume_baseline = Ma(input=[volume], param=[flow_window])",
+    "relative_volume = Div(input=[volume, volume_baseline], param=[])",
+    "log_relative_volume = Log(input=[relative_volume], param=[])",
+    "volume_change_short = Diff(input=[log_relative_volume], param=[migration_lag])",
+    "range_direction = Sign(input=[range_change_short], param=[])",
+    "volume_direction = Sign(input=[volume_change_short], param=[])",
+    "volume_leg_raw = Corr(input=[range_direction, volume_direction], param=[flow_window])",
+    "volume_confirmation_sign = Sign(input=[volume_leg_raw], param=[])",
+    "signed_migration = Mul(input=[migration_leg_raw, volume_confirmation_sign], param=[])",
+    "signed_migration_rank = Rank(input=[signed_migration], param=[rank_window])",
+    "volume_leg_rank = Rank(input=[volume_leg_raw], param=[rank_window])",
+    "joint_rank_score = Add(input=[signed_migration_rank, volume_leg_rank], param=[])",
+    "migration_sign = Sign(input=[migration_leg_raw], param=[])",
+    "volume_flow_sign = Sign(input=[volume_leg_raw], param=[])",
+    "sign_alignment = Mul(input=[migration_sign, volume_flow_sign], param=[])",
+    "alignment_gate = Sign(input=[sign_alignment], param=[])",
+    "gated_joint_rank = Mul(input=[joint_rank_score, alignment_gate], param=[])",
+    "cross_sectional_rank = Rank(input=[gated_joint_rank], param=[rank_window])",
+    "alpha = Zscore(input=[cross_sectional_rank], param=[rank_window])"
+  ]
+}

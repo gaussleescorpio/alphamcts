@@ -1,0 +1,177 @@
+{
+  "formula": [
+    {
+      "name": "Pct",
+      "param": ["daily_return_period"],
+      "input": ["close"],
+      "output": "daily_return"
+    },
+    {
+      "name": "Pct",
+      "param": ["short_window"],
+      "input": ["close"],
+      "output": "short_return"
+    },
+    {
+      "name": "Pct",
+      "param": ["long_window"],
+      "input": ["close"],
+      "output": "long_return"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["short_return"],
+      "output": "short_momentum"
+    },
+    {
+      "name": "Ma",
+      "param": ["long_window"],
+      "input": ["long_return"],
+      "output": "long_momentum"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["short_momentum", "long_momentum"],
+      "output": "momentum_acceleration"
+    },
+    {
+      "name": "Rank",
+      "param": ["long_window"],
+      "input": ["momentum_acceleration"],
+      "output": "acceleration_rank"
+    },
+    {
+      "name": "Rank",
+      "param": ["long_window"],
+      "input": ["long_momentum"],
+      "output": "long_momentum_rank"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["acceleration_rank", "long_momentum_rank"],
+      "output": "rank_orthogonalizer"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["daily_return"],
+      "output": "neg_daily_return"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["daily_return", "neg_daily_return"],
+      "output": "up_day_indicator"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["daily_return", "neg_daily_return"],
+      "output": "down_day_indicator"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume", "up_day_indicator"],
+      "output": "up_day_volume"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume", "down_day_indicator"],
+      "output": "down_day_volume"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["up_day_volume"],
+      "output": "avg_up_volume"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["down_day_volume"],
+      "output": "avg_down_volume"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["avg_up_volume", "avg_down_volume"],
+      "output": "volume_ratio"
+    },
+    {
+      "name": "Log",
+      "param": [],
+      "input": ["volume_ratio"],
+      "output": "volume_concentration"
+    },
+    {
+      "name": "Pct",
+      "param": ["short_window"],
+      "input": ["volume"],
+      "output": "volume_change"
+    },
+    {
+      "name": "Corr",
+      "param": ["long_window"],
+      "input": ["volume_change", "momentum_acceleration"],
+      "output": "flow_alignment"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_window"],
+      "input": ["flow_alignment"],
+      "output": "flow_alignment_smooth"
+    },
+    {
+      "name": "Tanh",
+      "param": [],
+      "input": ["flow_alignment_smooth"],
+      "output": "flow_gate"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["momentum_acceleration", "rank_orthogonalizer"],
+      "output": "accel_rank_scaled"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["accel_rank_scaled", "volume_concentration"],
+      "output": "signal_with_volume"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["signal_with_volume", "flow_gate"],
+      "output": "signal_with_flow"
+    },
+    {
+      "name": "Zscore",
+      "param": ["long_window"],
+      "input": ["signal_with_flow"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "daily_return_period": 1,
+      "short_window": 5,
+      "long_window": 20
+    },
+    {
+      "daily_return_period": 1,
+      "short_window": 10,
+      "long_window": 60
+    },
+    {
+      "daily_return_period": 1,
+      "short_window": 5,
+      "long_window": 40
+    }
+  ]
+}

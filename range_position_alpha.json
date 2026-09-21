@@ -1,0 +1,75 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_above_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_above_low", "daily_range"],
+      "output": "range_position"
+    },
+    {
+      "name": "Diff",
+      "param": ["position_lag"],
+      "input": ["range_position"],
+      "output": "position_change"
+    },
+    {
+      "name": "Vari",
+      "param": ["range_width_window"],
+      "input": ["daily_range"],
+      "output": "relative_range_width"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["position_change", "relative_range_width"],
+      "output": "adjusted_position_change"
+    },
+    {
+      "name": "Zscore",
+      "param": ["extremity_window"],
+      "input": ["range_position"],
+      "output": "position_zscore"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["adjusted_position_change", "position_zscore"],
+      "output": "reversal_raw"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["reversal_raw"],
+      "output": "range_position_residual_reversal"
+    }
+  ],
+  "arguments": [
+    {
+      "position_lag": 3,
+      "range_width_window": 20,
+      "extremity_window": 20
+    },
+    {
+      "position_lag": 5,
+      "range_width_window": 40,
+      "extremity_window": 40
+    },
+    {
+      "position_lag": 2,
+      "range_width_window": 60,
+      "extremity_window": 60
+    }
+  ]
+}

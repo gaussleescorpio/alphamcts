@@ -1,0 +1,20 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "price_minus_vwap"},
+    {"name": "Div", "param": [], "input": ["price_minus_vwap", "vwap"], "output": "relative_vwap_deviation"},
+    {"name": "Ma", "param": ["deviation_ma_window"], "input": ["relative_vwap_deviation"], "output": "persistent_stretch"},
+    {"name": "Std", "param": ["volatility_window"], "input": ["relative_vwap_deviation"], "output": "stretch_volatility"},
+    {"name": "Div", "param": [], "input": ["persistent_stretch", "stretch_volatility"], "output": "stretch_trend_noise"},
+    {"name": "Diff", "param": [], "input": ["close"], "output": "close_daily_change"},
+    {"name": "Diff", "param": [], "input": ["volume"], "output": "volume_daily_change"},
+    {"name": "Corr", "param": ["correlation_window"], "input": ["close_daily_change", "volume_daily_change"], "output": "volume_change_correlation"},
+    {"name": "Abs", "param": [], "input": ["volume_change_correlation"], "output": "alignment_confidence"},
+    {"name": "Mul", "param": [], "input": ["stretch_trend_noise", "alignment_confidence"], "output": "confidence_weighted_stretch"},
+    {"name": "Tanh", "param": [], "input": ["confidence_weighted_stretch"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"deviation_ma_window": 10, "volatility_window": 20, "correlation_window": 10},
+    {"deviation_ma_window": 5, "volatility_window": 10, "correlation_window": 5},
+    {"deviation_ma_window": 20, "volatility_window": 60, "correlation_window": 20}
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Div", "param": [], "input": ["daily_range", "close"], "output": "range_pct"},
+    {"name": "Ma", "param": ["short_lag"], "input": ["range_pct"], "output": "range_ma_short"},
+    {"name": "Ma", "param": ["norm_window"], "input": ["range_pct"], "output": "range_ma_long"},
+    {"name": "Div", "param": [], "input": ["range_ma_short", "range_ma_long"], "output": "range_ma_ratio"},
+    {"name": "Div", "param": [], "input": ["close", "close"], "output": "unity"},
+    {"name": "Sub", "param": [], "input": ["range_ma_ratio", "unity"], "output": "regime_weight"},
+    {"name": "Ma", "param": ["norm_window"], "input": ["range_pct"], "output": "norm_range_base"},
+    {"name": "Div", "param": [], "input": ["range_pct", "norm_range_base"], "output": "norm_range"},
+    {"name": "Ma", "param": ["norm_window"], "input": ["volume"], "output": "volume_ma"},
+    {"name": "Div", "param": [], "input": ["volume", "volume_ma"], "output": "volume_ratio"},
+    {"name": "Autocorr", "param": ["autocorr_window", "short_lag"], "input": ["norm_range"], "output": "autocorr_range_short"},
+    {"name": "Autocorr", "param": ["autocorr_window", "norm_window"], "input": ["norm_range"], "output": "autocorr_range_long"},
+    {"name": "Autocorr", "param": ["autocorr_window", "short_lag"], "input": ["volume_ratio"], "output": "autocorr_volume_short"},
+    {"name": "Autocorr", "param": ["autocorr_window", "norm_window"], "input": ["volume_ratio"], "output": "autocorr_volume_long"},
+    {"name": "Sub", "param": [], "input": ["autocorr_range_short", "autocorr_range_long"], "output": "autocorr_gap_range"},
+    {"name": "Sub", "param": [], "input": ["autocorr_volume_short", "autocorr_volume_long"], "output": "autocorr_gap_volume"},
+    {"name": "Sub", "param": [], "input": ["autocorr_gap_range", "autocorr_gap_volume"], "output": "persistence_gap"},
+    {"name": "Ma", "param": ["short_lag"], "input": ["persistence_gap"], "output": "persistence_gap_smooth"},
+    {"name": "Std", "param": ["autocorr_window"], "input": ["persistence_gap"], "output": "persistence_gap_std"},
+    {"name": "Div", "param": [], "input": ["persistence_gap_smooth", "persistence_gap_std"], "output": "persistence_snr"},
+    {"name": "Mul", "param": [], "input": ["persistence_gap", "persistence_snr"], "output": "snr_persistence_gap"},
+    {"name": "Diff", "param": ["short_lag"], "input": ["norm_range"], "output": "norm_range_diff"},
+    {"name": "Diff", "param": ["short_lag"], "input": ["volume_ratio"], "output": "volume_ratio_diff"},
+    {"name": "Corr", "param": ["norm_window"], "input": ["norm_range_diff", "volume_ratio_diff"], "output": "range_volume_corr"},
+    {"name": "Rank", "param": ["autocorr_window"], "input": ["snr_persistence_gap"], "output": "ranked_snr_persistence"},
+    {"name": "Rank", "param": ["norm_window"], "input": ["range_volume_corr"], "output": "ranked_range_volume_corr"},
+    {"name": "Mul", "param": [], "input": ["ranked_snr_persistence", "ranked_range_volume_corr"], "output": "ranked_interaction"},
+    {"name": "Mul", "param": [], "input": ["ranked_interaction", "regime_weight"], "output": "regime_adjusted_signal"},
+    {"name": "Tanh", "param": [], "input": ["regime_adjusted_signal"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"short_lag": 5, "norm_window": 20, "autocorr_window": 40},
+    {"short_lag": 10, "norm_window": 40, "autocorr_window": 60},
+    {"short_lag": 15, "norm_window": 60, "autocorr_window": 90}
+  ]
+}

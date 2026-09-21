@@ -1,0 +1,129 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "vwap_dislocation"
+    },
+    {
+      "name": "Std",
+      "param": ["dislocation_window"],
+      "input": ["vwap_dislocation"],
+      "output": "dislocation_volatility"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["vwap_dislocation", "dislocation_volatility"],
+      "output": "normalized_dislocation"
+    },
+    {
+      "name": "Zscore",
+      "param": ["short_zscore_window"],
+      "input": ["normalized_dislocation"],
+      "output": "short_dislocation_zscore"
+    },
+    {
+      "name": "Zscore",
+      "param": ["long_zscore_window"],
+      "input": ["normalized_dislocation"],
+      "output": "long_dislocation_zscore"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "greater_high_low"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["low", "high"],
+      "output": "greater_low_high"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["greater_high_low", "greater_low_high"],
+      "output": "blend_denominator"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["short_dislocation_zscore", "long_dislocation_zscore"],
+      "output": "sum_dislocation_zscore"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["sum_dislocation_zscore", "blend_denominator"],
+      "output": "blended_dislocation_zscore"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["blended_dislocation_zscore"],
+      "output": "mean_reversion_signal"
+    },
+    {
+      "name": "Rank",
+      "param": ["dislocation_window"],
+      "input": ["volume"],
+      "output": "volume_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["short_zscore_window"],
+      "input": ["volume_rank"],
+      "output": "smoothed_volume_rank"
+    },
+    {
+      "name": "Delay",
+      "param": [],
+      "input": ["vwap_dislocation"],
+      "output": "lagged_dislocation"
+    },
+    {
+      "name": "Corr",
+      "param": ["short_zscore_window"],
+      "input": ["vwap_dislocation", "lagged_dislocation"],
+      "output": "dislocation_autocorr"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["dislocation_autocorr"],
+      "output": "regime_weight"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["mean_reversion_signal", "smoothed_volume_rank"],
+      "output": "volume_conditioned_signal"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume_conditioned_signal", "regime_weight"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "dislocation_window": 20,
+      "short_zscore_window": 10,
+      "long_zscore_window": 60
+    },
+    {
+      "dislocation_window": 10,
+      "short_zscore_window": 5,
+      "long_zscore_window": 30
+    },
+    {
+      "dislocation_window": 40,
+      "short_zscore_window": 20,
+      "long_zscore_window": 120
+    }
+  ]
+}

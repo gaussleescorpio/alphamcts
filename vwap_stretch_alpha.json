@@ -1,0 +1,31 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "close_minus_vwap"},
+    {"name": "Div", "param": [], "input": ["close_minus_vwap", "vwap"], "output": "vwap_relative_gap"},
+    {"name": "Ma", "param": ["short_window"], "input": ["vwap_relative_gap"], "output": "short_vwap_gap"},
+    {"name": "Ma", "param": ["long_window"], "input": ["vwap_relative_gap"], "output": "long_vwap_gap"},
+    {"name": "Sub", "param": [], "input": ["short_vwap_gap", "long_vwap_gap"], "output": "vwap_stretch_spread"},
+    {"name": "Zscore", "param": ["long_window"], "input": ["vwap_stretch_spread"], "output": "stretch_zscore"},
+    {"name": "Zscore", "param": ["long_window"], "input": ["short_vwap_gap"], "output": "short_gap_zscore"},
+    {"name": "Abs", "param": [], "input": ["short_gap_zscore"], "output": "abs_short_gap_zscore"},
+    {"name": "Ma", "param": ["extreme_baseline_window"], "input": ["abs_short_gap_zscore"], "output": "stretch_abs_baseline"},
+    {"name": "Greater", "param": [], "input": ["abs_short_gap_zscore", "stretch_abs_baseline"], "output": "extreme_stretch_gate"},
+    {"name": "Sign", "param": [], "input": ["short_vwap_gap"], "output": "short_vwap_gap_sign"},
+    {"name": "Neg", "param": [], "input": ["short_vwap_gap_sign"], "output": "mean_reversion_sign"},
+    {"name": "Diff", "param": ["short_window"], "input": ["volume"], "output": "volume_change"},
+    {"name": "Zscore", "param": ["long_window"], "input": ["volume_change"], "output": "volume_change_zscore"},
+    {"name": "Med", "param": ["long_window"], "input": ["volume"], "output": "volume_median_long"},
+    {"name": "Greater", "param": [], "input": ["volume", "volume_median_long"], "output": "elevated_volume_flag"},
+    {"name": "Mul", "param": [], "input": ["volume_change_zscore", "elevated_volume_flag"], "output": "volume_exhaustion_score"},
+    {"name": "Rank", "param": ["long_window"], "input": ["stretch_zscore"], "output": "stretch_cross_section_rank"},
+    {"name": "Rank", "param": ["long_window"], "input": ["volume_exhaustion_score"], "output": "volume_cross_section_rank"},
+    {"name": "Mul", "param": [], "input": ["stretch_cross_section_rank", "volume_cross_section_rank"], "output": "joint_pressure_score"},
+    {"name": "Mul", "param": [], "input": ["mean_reversion_sign", "joint_pressure_score"], "output": "signed_fade_score"},
+    {"name": "Mul", "param": [], "input": ["signed_fade_score", "extreme_stretch_gate"], "output": "alpha"}
+  ],
+  "arguments": [
+    {"short_window": 5, "long_window": 60, "extreme_baseline_window": 60},
+    {"short_window": 10, "long_window": 40, "extreme_baseline_window": 40},
+    {"short_window": 3, "long_window": 20, "extreme_baseline_window": 20}
+  ]
+}

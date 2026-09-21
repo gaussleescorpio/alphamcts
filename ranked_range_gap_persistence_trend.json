@@ -1,0 +1,81 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "daily_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "close_vwap_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_vwap_diff", "daily_range"],
+      "output": "range_normalized_gap"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["range_normalized_gap"],
+      "output": "zscore_gap"
+    },
+    {
+      "name": "Autocorr",
+      "param": ["lookback_period", "autocorr_lag"],
+      "input": ["zscore_gap"],
+      "output": "gap_persistence"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["gap_persistence"],
+      "output": "ranked_persistence"
+    },
+    {
+      "name": "Pct",
+      "param": ["momentum_window"],
+      "input": ["close"],
+      "output": "close_momentum"
+    },
+    {
+      "name": "Corr",
+      "param": ["momentum_window"],
+      "input": ["zscore_gap", "close_momentum"],
+      "output": "trend_confirmation"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["trend_confirmation"],
+      "output": "ranked_trend"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["ranked_persistence", "ranked_trend"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_period": 20,
+      "autocorr_lag": 1,
+      "momentum_window": 10
+    },
+    {
+      "lookback_period": 40,
+      "autocorr_lag": 5,
+      "momentum_window": 20
+    },
+    {
+      "lookback_period": 10,
+      "autocorr_lag": 1,
+      "momentum_window": 5
+    }
+  ]
+}

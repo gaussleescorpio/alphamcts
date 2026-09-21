@@ -1,0 +1,255 @@
+{
+  "formula": [
+    {
+      "name": "Ma",
+      "param": ["vwap_window"],
+      "input": ["vwap"],
+      "output": "vwap_anchor"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap_anchor"],
+      "output": "close_minus_vwap_anchor"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_minus_vwap_anchor", "close"],
+      "output": "price_stretch"
+    },
+    {
+      "name": "Med",
+      "param": ["lookback_period"],
+      "input": ["price_stretch"],
+      "output": "price_stretch_median"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["price_stretch", "price_stretch_median"],
+      "output": "stretch_demeaned"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["stretch_demeaned"],
+      "output": "neg_stretch_demeaned"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["neg_stretch_demeaned"],
+      "output": "stretch_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["smooth_window"],
+      "input": ["volume"],
+      "output": "volume_smoothed"
+    },
+    {
+      "name": "Ma",
+      "param": ["lookback_period"],
+      "input": ["volume"],
+      "output": "volume_long_smoothed"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["volume_smoothed"],
+      "output": "volume_rank_short"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["volume_long_smoothed"],
+      "output": "volume_rank_long"
+    },
+    {
+      "name": "Med",
+      "param": ["lookback_period"],
+      "input": ["volume_smoothed"],
+      "output": "volume_smoothed_median"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["volume_smoothed", "volume_smoothed_median"],
+      "output": "volume_above_median"
+    },
+    {
+      "name": "Delay",
+      "param": ["smooth_window"],
+      "input": ["volume_rank_short"],
+      "output": "volume_rank_prior"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume_above_median", "volume_rank_short"],
+      "output": "volume_active_term"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["volume_above_median", "volume_rank_short"],
+      "output": "volume_inactive_weight"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["volume_inactive_weight", "volume_rank_prior"],
+      "output": "volume_inactive_term"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["volume_active_term", "volume_inactive_term"],
+      "output": "volume_contribution"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["stretch_rank", "volume_contribution"],
+      "output": "raw_composite"
+    },
+    {
+      "name": "Ma",
+      "param": ["smooth_window"],
+      "input": ["raw_composite"],
+      "output": "smoothed_alpha"
+    },
+    {
+      "name": "Delay",
+      "param": ["smooth_window"],
+      "input": ["smoothed_alpha"],
+      "output": "prior_alpha"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["raw_composite", "prior_alpha"],
+      "output": "composite_change"
+    },
+    {
+      "name": "Std",
+      "param": ["smooth_window"],
+      "input": ["raw_composite"],
+      "output": "adaptive_deadband"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["volume_rank_short", "volume_rank_long"],
+      "output": "volume_rank_diff"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["volume_rank_diff"],
+      "output": "volume_regime_shift"
+    },
+    {
+      "name": "Abs",
+      "param": [],
+      "input": ["composite_change"],
+      "output": "composite_change_abs"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["composite_change_abs", "volume_regime_shift"],
+      "output": "rebalance_trigger_input"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["rebalance_trigger_input", "adaptive_deadband"],
+      "output": "rebalance_trigger"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["rebalance_trigger", "raw_composite"],
+      "output": "gated_active_term"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["rebalance_trigger", "prior_alpha"],
+      "output": "gated_hold_weight"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["gated_hold_weight", "prior_alpha"],
+      "output": "gated_hold_term"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["gated_active_term", "gated_hold_term"],
+      "output": "gated_composite"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["gated_composite", "prior_alpha"],
+      "output": "signal_change"
+    },
+    {
+      "name": "Ma",
+      "param": ["smooth_window"],
+      "input": ["gated_composite"],
+      "output": "slow_smooth_path"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["signal_change", "prior_alpha"],
+      "output": "signal_change_gt_prior"
+    },
+    {
+      "name": "Less",
+      "param": [],
+      "input": ["signal_change", "prior_alpha"],
+      "output": "signal_change_lt_prior"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["signal_change_gt_prior", "gated_composite"],
+      "output": "fast_smooth_term"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["signal_change_lt_prior", "slow_smooth_path"],
+      "output": "slow_smooth_term"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["fast_smooth_term", "slow_smooth_term"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "vwap_window": 10,
+      "lookback_period": 60,
+      "smooth_window": 5
+    },
+    {
+      "vwap_window": 5,
+      "lookback_period": 20,
+      "smooth_window": 3
+    },
+    {
+      "vwap_window": 20,
+      "lookback_period": 90,
+      "smooth_window": 10
+    }
+  ]
+}

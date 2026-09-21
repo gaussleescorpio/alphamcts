@@ -1,0 +1,63 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["vwap", "close"],
+      "output": "vwap_minus_close"
+    },
+    {
+      "name": "Ma",
+      "param": ["gap_smoothing_window"],
+      "input": ["vwap_minus_close"],
+      "output": "smoothed_vwap_discount"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["smoothed_vwap_discount"],
+      "output": "discount_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["gap_smoothing_window"],
+      "input": ["volume"],
+      "output": "smoothed_volume"
+    },
+    {
+      "name": "Corr",
+      "param": ["correlation_window"],
+      "input": ["smoothed_vwap_discount", "smoothed_volume"],
+      "output": "volume_discount_correlation"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["volume_discount_correlation"],
+      "output": "correlation_confirmation"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["discount_rank", "correlation_confirmation"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "gap_smoothing_window": 5,
+      "correlation_window": 20,
+      "rank_window": 20
+    },
+    {
+      "gap_smoothing_window": 10,
+      "correlation_window": 40,
+      "rank_window": 40
+    },
+    {
+      "gap_smoothing_window": 20,
+      "correlation_window": 60,
+      "rank_window": 60
+    }
+  ]
+}

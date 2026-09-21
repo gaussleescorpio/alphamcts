@@ -1,0 +1,41 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["close", "vwap"], "output": "vwap_gap"},
+    {"name": "Div", "param": [], "input": ["vwap_gap", "vwap"], "output": "vwap_relative_deviation"},
+    {"name": "Abs", "param": [], "input": ["vwap_relative_deviation"], "output": "abs_vwap_relative_deviation"},
+    {"name": "Ma", "param": ["vwap_smoothing_window"], "input": ["abs_vwap_relative_deviation"], "output": "mean_abs_vwap_deviation"},
+    {"name": "Neg", "param": [], "input": ["mean_abs_vwap_deviation"], "output": "neg_smoothed_vwap_stability"},
+    {"name": "Rank", "param": ["cross_section_rank_window"], "input": ["neg_smoothed_vwap_stability"], "output": "vwap_stability_rank"},
+    {"name": "Delay", "param": ["price_lag_days"], "input": ["close"], "output": "prior_close"},
+    {"name": "Diff", "param": ["price_lag_days"], "input": ["close"], "output": "close_change"},
+    {"name": "Div", "param": [], "input": ["close_change", "prior_close"], "output": "daily_return"},
+    {"name": "Abs", "param": [], "input": ["daily_return"], "output": "abs_daily_return"},
+    {"name": "Diff", "param": ["volume_lag_days"], "input": ["volume"], "output": "volume_change"},
+    {"name": "Corr", "param": ["return_volume_corr_window"], "input": ["abs_daily_return", "volume_change"], "output": "abs_return_volume_correlation"},
+    {"name": "Rank", "param": ["cross_section_rank_window"], "input": ["abs_return_volume_correlation"], "output": "volume_confirmation_rank"},
+    {"name": "Add", "param": [], "input": ["vwap_stability_rank", "volume_confirmation_rank"], "output": "alpha"}
+  ],
+  "arguments": [
+    {
+      "vwap_smoothing_window": 10,
+      "cross_section_rank_window": 60,
+      "return_volume_corr_window": 20,
+      "price_lag_days": 1,
+      "volume_lag_days": 1
+    },
+    {
+      "vwap_smoothing_window": 20,
+      "cross_section_rank_window": 90,
+      "return_volume_corr_window": 40,
+      "price_lag_days": 1,
+      "volume_lag_days": 1
+    },
+    {
+      "vwap_smoothing_window": 40,
+      "cross_section_rank_window": 120,
+      "return_volume_corr_window": 60,
+      "price_lag_days": 1,
+      "volume_lag_days": 1
+    }
+  ]
+}

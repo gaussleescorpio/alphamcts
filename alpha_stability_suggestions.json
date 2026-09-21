@@ -1,0 +1,7 @@
+{
+  "suggestions": [
+    "Replace the raw composite level with a daily cross-sectional rank of the full interaction: Rank((Diff(close,5)/Std(close,20))*Rank(volume,20)). Investment rationale: absolute vol-scaled returns drift with market-wide volatility regimes, so the same economic setup scores very differently across years; ranking the finished signal within the universe each day makes the alpha relative and regime-agnostic, which should lift year-over-year RankIR consistency without relying on tighter lookback tuning alone.",
+    "Apply temporal smoothing to the entire composite rather than only the volume leg: Ma((Diff(close,5)/Std(close,20))*Rank(volume,20), 15). Investment rationale: prior refinements dampened volume noise but left the price leg free to flip sign daily, driving turnover near 1.0 and unstable RankIR; averaging the full participation-weighted momentum preserves directional conviction over several sessions while reducing daily rank churn that erodes cross-period performance consistency.",
+    "Stabilize the volatility normalization by smoothing the denominator before scaling returns: (Diff(close,5)/Ma(Std(close,20),10))*Rank(volume,20). Investment rationale: a raw 20-day standard deviation jumps sharply after volatility shocks, mechanically inflating or deflating the price leg and making the signal's economic meaning inconsistent across subperiods; a smoothed vol estimate yields more stable scaling of recent moves, reducing regime-driven sign flips that degrade RankIR."
+  ]
+}

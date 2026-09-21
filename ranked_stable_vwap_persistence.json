@@ -1,0 +1,111 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "high_low_range"
+    },
+    {
+      "name": "Med",
+      "param": ["lookback_period"],
+      "input": ["high_low_range"],
+      "output": "range_floor"
+    },
+    {
+      "name": "Max",
+      "param": [],
+      "input": ["high_low_range", "range_floor"],
+      "output": "stabilized_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "vwap_distance"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["vwap_distance", "stabilized_range"],
+      "output": "relative_vwap_position"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["relative_vwap_position"],
+      "output": "normalized_vwap_position"
+    },
+    {
+      "name": "Ma",
+      "param": ["smoothing_period"],
+      "input": ["normalized_vwap_position"],
+      "output": "smoothed_vwap_position"
+    },
+    {
+      "name": "Autocorr",
+      "param": ["lookback_period", "rank_period"],
+      "input": ["smoothed_vwap_position"],
+      "output": "short_lag_persistence"
+    },
+    {
+      "name": "Autocorr",
+      "param": ["lookback_period", "smoothing_period"],
+      "input": ["smoothed_vwap_position"],
+      "output": "medium_lag_persistence"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["short_lag_persistence", "medium_lag_persistence"],
+      "output": "combined_persistence"
+    },
+    {
+      "name": "Diff",
+      "param": ["smoothing_period"],
+      "input": ["volume"],
+      "output": "volume_change"
+    },
+    {
+      "name": "Zscore",
+      "param": ["lookback_period"],
+      "input": ["volume_change"],
+      "output": "volume_confirmation"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["combined_persistence"],
+      "output": "persistence_rank"
+    },
+    {
+      "name": "Rank",
+      "param": ["lookback_period"],
+      "input": ["volume_confirmation"],
+      "output": "volume_rank"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["persistence_rank", "volume_rank"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "lookback_period": 20,
+      "smoothing_period": 5,
+      "rank_period": 1
+    },
+    {
+      "lookback_period": 40,
+      "smoothing_period": 10,
+      "rank_period": 1
+    },
+    {
+      "lookback_period": 60,
+      "smoothing_period": 5,
+      "rank_period": 1
+    }
+  ]
+}

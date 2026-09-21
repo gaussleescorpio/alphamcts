@@ -1,0 +1,153 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "low"],
+      "output": "close_minus_low"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "high_minus_low"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["close_minus_low", "high_minus_low"],
+      "output": "range_position"
+    },
+    {
+      "name": "Ma",
+      "param": ["position_window"],
+      "input": ["range_position"],
+      "output": "position_mean"
+    },
+    {
+      "name": "Std",
+      "param": ["position_window"],
+      "input": ["range_position"],
+      "output": "position_std"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["position_mean", "position_std"],
+      "output": "winsor_lower_bound"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["position_mean", "position_std"],
+      "output": "winsor_upper_bound"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["range_position", "winsor_lower_bound"],
+      "output": "range_above_lower_bound"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["range_position", "winsor_lower_bound"],
+      "output": "range_minus_lower_bound"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["range_above_lower_bound", "range_minus_lower_bound"],
+      "output": "lower_excess"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["winsor_lower_bound", "lower_excess"],
+      "output": "capped_position_lower"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["capped_position_lower", "winsor_upper_bound"],
+      "output": "capped_above_upper_bound"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["capped_position_lower", "winsor_upper_bound"],
+      "output": "capped_minus_upper_bound"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["capped_above_upper_bound", "capped_minus_upper_bound"],
+      "output": "upper_excess"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["capped_position_lower", "upper_excess"],
+      "output": "winsorized_position"
+    },
+    {
+      "name": "Ma",
+      "param": ["position_window"],
+      "input": ["winsorized_position"],
+      "output": "smoothed_position"
+    },
+    {
+      "name": "Rank",
+      "param": ["rank_window"],
+      "input": ["smoothed_position"],
+      "output": "position_rank"
+    },
+    {
+      "name": "Ma",
+      "param": ["position_window"],
+      "input": ["volume"],
+      "output": "short_term_volume"
+    },
+    {
+      "name": "Ma",
+      "param": ["volume_baseline_window"],
+      "input": ["volume"],
+      "output": "baseline_volume"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["short_term_volume", "baseline_volume"],
+      "output": "volume_participation_filter"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["position_rank", "volume_participation_filter"],
+      "output": "raw_signal"
+    },
+    {
+      "name": "Ma",
+      "param": ["position_window"],
+      "input": ["raw_signal"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "position_window": 10,
+      "rank_window": 20,
+      "volume_baseline_window": 60
+    },
+    {
+      "position_window": 5,
+      "rank_window": 10,
+      "volume_baseline_window": 40
+    },
+    {
+      "position_window": 20,
+      "rank_window": 40,
+      "volume_baseline_window": 90
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+seed: 42
+
+data:
+  source: clickhouse
+  horizon: 20                    # fwd_20 target
+  periods:                       # explicit chronological split
+    train: ["2018-01-01", "2023-01-01"]
+    valid: ["2023-01-02", "2024-12-31"]
+    test:  ["2025-01-01", "2026-12-31"]
+  clickhouse:
+    neutralize: true            # industry (SW L1) + log-size neutralization of target & factors
+    mktcap_table: china_a_share_mktcap
+    industry_table: sw_industry_member
+    host: 127.0.0.1
+    port: 8123
+    user: gauss
+    password: "123456"
+    database: quant_system
+    price_table: daily_hfq
+    returns_table: forward_returns
+    weight_table: index_weight
+    target_column: fwd_20
+    index_code: "000300.SH"      # CSI300 point-in-time universe
+    start_date: "20160601"       # load buffer before train start for rolling warm-up (2x 120d nested windows)
+    end_date: "20261231"
+
+window_range: [2, 120]
+
+mcts:
+  exploration_weight: 1.0
+  initial_budget: 3
+  budget_increment: 1
+  max_budget: 6
+  dimension_temperature: 1.0
+  e_max: 1.0
+  max_correction_attempts: 3
+
+mining:
+  n_trees: 10000        # effectively unlimited; the run stops at target_zoo_size
+  target_zoo_size: 100
+  parallel_trees: 6   # concurrent MCTS trees (LLM round-trips overlap; zoo updates serialized)
+
+zoo:
+  min_rank_ic: 0.015
+  min_rank_ir: 0.15
+  max_turnover: 1.6
+  max_correlation: 0.8
+  max_rel_rank: 0.95
+  # anti-overfitting admission gates (FactorForge-style funnel)
+  max_hac_pvalue: 0.05    # Newey-West one-sided p of mean RankIC, lag = horizon
+  min_block_frac: 0.6     # >=60% of 4 chronological blocks with positive mean IC
+  min_year_frac: 0.6      # >=60% of training years with positive mean IC
+  max_control_ic: 0.02    # asset-mismatch negative control must collapse
+  max_recon_r2: 0.8       # out-of-time reconstruction R^2 from existing zoo
+  min_q_spread: 0.0       # Q5 - Q1 mean fwd return must be positive
+  min_ls_sharpe: 1.0      # annualized Sharpe of the cost-free daily Q5-Q1 portfolio
+  min_q_monotonic: 0.75   # >= 3 of 4 adjacent quintile pairs correctly ordered
+  require_valid_sign: true  # train & validation RankIC must share the same sign
+
+fsa:
+  top_k: 3
+  min_support: 0.3
+  min_alphas: 5
+
+evaluation:
+  top_frac: 0.1
+
+llm:
+  backend: cursor
+  model: composer-2.5
+  overfit_scorer: heuristic   # llm = paper's Fig.17 Composer call; heuristic = local structural score (~2x faster mining)
+  few_shot_k: 1
+  correlation_filter_eta: 0.5
+  temperature_generate: 1.0
+  temperature_correct: 0.8
+  temperature_overfit: 0.1
+
+combiner:
+  alpha_set_sizes: [all]
+  models: [equal, ewma]
+  ewma:
+    halflife: 63       # EWMA half-life (days) of the daily RankIC used as factor weight
+    min_periods: 60    # warm-up before a factor can carry dynamic weight
+  lightgbm:
+    num_leaves: 32
+    n_estimators: 200
+    max_depth: 8
+    learning_rate: 0.05
+    reg_alpha: 0.1
+    reg_lambda: 0.1
+  mlp:
+    hidden: [256, 128, 64]
+    dropout: 0.3
+    lr: 0.001
+    batch_size: 1024
+    max_epochs: 50
+    patience: 5
+
+backtest:
+  top_frac: 0.1
+  cost: 0.0015

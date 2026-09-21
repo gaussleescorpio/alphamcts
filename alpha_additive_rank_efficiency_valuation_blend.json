@@ -1,0 +1,111 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "open"],
+      "output": "intraday_body"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "true_range"
+    },
+    {
+      "name": "Med",
+      "param": ["range_median_window"],
+      "input": ["true_range"],
+      "output": "median_true_range"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["true_range", "median_true_range"],
+      "output": "range_exceeds_median"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["true_range", "median_true_range"],
+      "output": "range_minus_median"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["range_exceeds_median", "range_minus_median"],
+      "output": "range_excess_when_above"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["range_excess_when_above", "median_true_range"],
+      "output": "floored_range"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["intraday_body", "floored_range"],
+      "output": "range_efficiency"
+    },
+    {
+      "name": "Sign",
+      "param": [],
+      "input": ["range_efficiency"],
+      "output": "efficiency_direction"
+    },
+    {
+      "name": "Sum",
+      "param": ["persistence_window"],
+      "input": ["efficiency_direction"],
+      "output": "persistence_score"
+    },
+    {
+      "name": "Rank",
+      "param": ["valuation_window"],
+      "input": ["persistence_score"],
+      "output": "efficiency_rank"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["close", "vwap"],
+      "output": "fair_value_gap"
+    },
+    {
+      "name": "Zscore",
+      "param": ["valuation_window"],
+      "input": ["fair_value_gap"],
+      "output": "fair_value_zscore"
+    },
+    {
+      "name": "Rank",
+      "param": ["valuation_window"],
+      "input": ["fair_value_zscore"],
+      "output": "valuation_rank"
+    },
+    {
+      "name": "Add",
+      "param": [],
+      "input": ["efficiency_rank", "valuation_rank"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "range_median_window": 20,
+      "persistence_window": 10,
+      "valuation_window": 60
+    },
+    {
+      "range_median_window": 10,
+      "persistence_window": 5,
+      "valuation_window": 40
+    },
+    {
+      "range_median_window": 40,
+      "persistence_window": 20,
+      "valuation_window": 120
+    }
+  ]
+}

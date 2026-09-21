@@ -1,0 +1,177 @@
+{
+  "formula": [
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "low"],
+      "output": "price_range"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["high", "close"],
+      "output": "high_close_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["high_close_diff", "price_range"],
+      "output": "upper_wick_ratio"
+    },
+    {
+      "name": "Ma",
+      "param": ["smooth_window"],
+      "input": ["upper_wick_ratio"],
+      "output": "smoothed_upper_wick"
+    },
+    {
+      "name": "Std",
+      "param": ["history_window"],
+      "input": ["smoothed_upper_wick"],
+      "output": "wick_dispersion"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["smoothed_upper_wick", "wick_dispersion"],
+      "output": "normalized_rejection"
+    },
+    {
+      "name": "Rank",
+      "param": ["history_window"],
+      "input": ["normalized_rejection"],
+      "output": "rejection_rank"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["rejection_rank"],
+      "output": "rejection_intensity"
+    },
+    {
+      "name": "Diff",
+      "param": ["reversal_lag"],
+      "input": ["close"],
+      "output": "close_change"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["close_change"],
+      "output": "neg_close_change"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["close_change", "neg_close_change"],
+      "output": "up_day_flag"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["up_day_flag", "volume"],
+      "output": "up_day_volume"
+    },
+    {
+      "name": "Sum",
+      "param": ["smooth_window"],
+      "input": ["up_day_volume"],
+      "output": "up_volume_sum"
+    },
+    {
+      "name": "Sum",
+      "param": ["smooth_window"],
+      "input": ["volume"],
+      "output": "total_volume_sum"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["up_volume_sum", "total_volume_sum"],
+      "output": "up_volume_share"
+    },
+    {
+      "name": "Ma",
+      "param": ["smooth_window"],
+      "input": ["up_volume_share"],
+      "output": "volume_concentration"
+    },
+    {
+      "name": "Delay",
+      "param": ["reversal_lag"],
+      "input": ["close"],
+      "output": "prior_close"
+    },
+    {
+      "name": "Sub",
+      "param": [],
+      "input": ["open", "prior_close"],
+      "output": "open_prior_diff"
+    },
+    {
+      "name": "Div",
+      "param": [],
+      "input": ["open_prior_diff", "prior_close"],
+      "output": "overnight_gap"
+    },
+    {
+      "name": "Neg",
+      "param": [],
+      "input": ["overnight_gap"],
+      "output": "neg_overnight_gap"
+    },
+    {
+      "name": "Greater",
+      "param": [],
+      "input": ["overnight_gap", "neg_overnight_gap"],
+      "output": "gap_up_flag"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["gap_up_flag", "upper_wick_ratio"],
+      "output": "gap_upper_wick"
+    },
+    {
+      "name": "Ma",
+      "param": ["smooth_window"],
+      "input": ["gap_upper_wick"],
+      "output": "smoothed_gap_fade"
+    },
+    {
+      "name": "Rank",
+      "param": ["history_window"],
+      "input": ["smoothed_gap_fade"],
+      "output": "gap_fade_rank"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["rejection_intensity", "volume_concentration"],
+      "output": "rejection_volume_intermediate"
+    },
+    {
+      "name": "Mul",
+      "param": [],
+      "input": ["rejection_volume_intermediate", "gap_fade_rank"],
+      "output": "alpha"
+    }
+  ],
+  "arguments": [
+    {
+      "smooth_window": 5,
+      "history_window": 60,
+      "reversal_lag": 1
+    },
+    {
+      "smooth_window": 10,
+      "history_window": 90,
+      "reversal_lag": 1
+    },
+    {
+      "smooth_window": 20,
+      "history_window": 120,
+      "reversal_lag": 1
+    }
+  ]
+}

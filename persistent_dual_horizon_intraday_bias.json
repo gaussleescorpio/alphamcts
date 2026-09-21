@@ -1,0 +1,56 @@
+{
+  "formula": [
+    {"name": "Sub", "param": [], "input": ["high", "low"], "output": "daily_range"},
+    {"name": "Sub", "param": [], "input": ["close", "open"], "output": "open_close_spread"},
+    {"name": "Div", "param": [], "input": ["open_close_spread", "daily_range"], "output": "intraday_bias"},
+    {"name": "Rank", "param": ["correlation_window"], "input": ["intraday_bias"], "output": "intraday_bias_rank"},
+    {"name": "Ma", "param": ["correlation_window"], "input": ["intraday_bias_rank"], "output": "body_signal"},
+    {"name": "Corr", "param": ["correlation_window"], "input": ["volume", "daily_range"], "output": "corr_short"},
+    {"name": "Corr", "param": ["long_correlation_window"], "input": ["volume", "daily_range"], "output": "corr_long"},
+    {"name": "Sub", "param": [], "input": ["corr_short", "corr_short"], "output": "zero_anchor"},
+    {"name": "Less", "param": [], "input": ["corr_short", "corr_long"], "output": "short_below_long"},
+    {"name": "Greater", "param": [], "input": ["corr_short", "corr_long"], "output": "short_at_or_above_long"},
+    {"name": "Mul", "param": [], "input": ["short_below_long", "corr_short"], "output": "min_corr_short_branch"},
+    {"name": "Mul", "param": [], "input": ["short_at_or_above_long", "corr_long"], "output": "min_corr_long_branch"},
+    {"name": "Add", "param": [], "input": ["min_corr_short_branch", "min_corr_long_branch"], "output": "min_corr"},
+    {"name": "Greater", "param": [], "input": ["min_corr", "zero_anchor"], "output": "regime_ok"},
+    {"name": "Sign", "param": [], "input": ["corr_short"], "output": "sign_corr_short"},
+    {"name": "Sign", "param": [], "input": ["corr_long"], "output": "sign_corr_long"},
+    {"name": "Sub", "param": [], "input": ["sign_corr_short", "sign_corr_long"], "output": "sign_match"},
+    {"name": "Sum", "param": ["correlation_window"], "input": ["daily_range", "daily_range"], "output": "one_anchor_sum"},
+    {"name": "Div", "param": [], "input": ["one_anchor_sum", "one_anchor_sum"], "output": "one_anchor"},
+    {"name": "Abs", "param": [], "input": ["sign_match"], "output": "abs_sign_match"},
+    {"name": "Sub", "param": [], "input": ["one_anchor", "abs_sign_match"], "output": "sign_agreement"},
+    {"name": "Mul", "param": [], "input": ["regime_ok", "sign_agreement"], "output": "dual_horizon_regime"},
+    {"name": "Med", "param": ["correlation_window"], "input": ["corr_short"], "output": "corr_short_median"},
+    {"name": "Greater", "param": [], "input": ["corr_short", "corr_short_median"], "output": "corr_above_median"},
+    {"name": "Sum", "param": ["correlation_window"], "input": ["corr_above_median"], "output": "persistence_count"},
+    {"name": "Sum", "param": ["min_persistence_sessions"], "input": ["one_anchor", "one_anchor"], "output": "min_persistence_threshold"},
+    {"name": "Sub", "param": [], "input": ["persistence_count", "min_persistence_threshold"], "output": "persistence_excess"},
+    {"name": "Greater", "param": [], "input": ["persistence_excess", "zero_anchor"], "output": "persistence_ok"},
+    {"name": "Mul", "param": [], "input": ["dual_horizon_regime", "persistence_ok"], "output": "liquidity_regime_gate"},
+    {"name": "Mul", "param": [], "input": ["body_signal", "liquidity_regime_gate"], "output": "raw_alpha"},
+    {"name": "Rank", "param": ["rank_smooth_window"], "input": ["raw_alpha"], "output": "raw_alpha_rank"},
+    {"name": "Ma", "param": ["rank_smooth_window"], "input": ["raw_alpha_rank"], "output": "alpha"}
+  ],
+  "arguments": [
+    {
+      "correlation_window": 20,
+      "long_correlation_window": 60,
+      "rank_smooth_window": 10,
+      "min_persistence_sessions": 12
+    },
+    {
+      "correlation_window": 15,
+      "long_correlation_window": 45,
+      "rank_smooth_window": 8,
+      "min_persistence_sessions": 10
+    },
+    {
+      "correlation_window": 30,
+      "long_correlation_window": 90,
+      "rank_smooth_window": 15,
+      "min_persistence_sessions": 18
+    }
+  ]
+}
